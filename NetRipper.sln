@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DLL", "DLL\InjectedDLL.vcxproj", "{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetRipper", "NetRipper\SSLRipper.vcxproj", "{36AB45D2-F886-4803-AA7E-6FD5520458FC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5} = {60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}.Debug|Win32.Build.0 = Debug|Win32
+		{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}.Release|Win32.ActiveCfg = Release|Win32
+		{60BBE2CB-585B-4DBD-9CB9-22F00D3F11E5}.Release|Win32.Build.0 = Release|Win32
+		{36AB45D2-F886-4803-AA7E-6FD5520458FC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36AB45D2-F886-4803-AA7E-6FD5520458FC}.Debug|Win32.Build.0 = Debug|Win32
+		{36AB45D2-F886-4803-AA7E-6FD5520458FC}.Release|Win32.ActiveCfg = Release|Win32
+		{36AB45D2-F886-4803-AA7E-6FD5520458FC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
