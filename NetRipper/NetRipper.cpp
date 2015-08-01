@@ -26,6 +26,7 @@ using namespace std;
 vector<PROCESSENTRY32> GetProcesses();
 vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 string ToLower(string p_sString);
+bool IsWindows64();
 
 BOOL InjectAllByName(string p_sDLLName, string p_sProcessName, BOOL p_bReflectiveInject = TRUE);
 void InjectAll(string p_sDLLName, BOOL p_bReflectiveInject = TRUE);
@@ -257,6 +258,19 @@ BOOL ReplaceData(string p_sDLL, string p_sData)
 	return TRUE;
 }
 
+// Check if Windows is 64bit
+
+bool IsWindows64()
+{
+	SYSTEM_INFO si;
+    GetSystemInfo(&si);
+
+    if((si.wProcessorArchitecture & PROCESSOR_ARCHITECTURE_AMD64) == 64)
+		return true;
+    else
+		return false;
+}
+
 // Function that returns a vector with all processes
 
 vector<PROCESSENTRY32> GetProcesses()
@@ -351,20 +365,25 @@ BOOL NormalInject(string p_sDLLName, DWORD p_dwID)
 		return false;
 	}
 
-	// Check if process is 32 bit
+	// Check if Windows is 64 bit
 
-	bResult = IsWow64Process(hProcess, &bIs32Bit);
-
-	if(bResult == 0)
+	if(IsWindows64())
 	{
-		cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
-		return false;
-	}
+		// Check if process is 32 bit
 
-	if(!bIs32Bit)
-	{
-		cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
-		return false;
+		bResult = IsWow64Process(hProcess, &bIs32Bit);
+
+		if(bResult == 0)
+		{
+			cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
+			return false;
+		}
+
+		if(!bIs32Bit)
+		{
+			cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
+			return false;
+		}
 	}
 	
 	// Get LoadLibrary address
@@ -548,20 +567,25 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 			bResult = FALSE; break;
 		}
 
-		// Check if process is 32 bit
+		// Check if Windows is 64 bit
 
-		bResult = IsWow64Process(hProcess, &bIs32Bit);
-
-		if(bResult == 0)
+		if(IsWindows64())
 		{
-			cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
-			bResult = FALSE; break;
-		}
+			// Check if process is 32 bit
 
-		if(!bIs32Bit)
-		{
-			cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
-			bResult = FALSE; break;
+			bResult = IsWow64Process(hProcess, &bIs32Bit);
+
+			if(bResult == 0)
+			{
+				cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
+				bResult = FALSE; break;
+			}
+
+			if(!bIs32Bit)
+			{
+				cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
+				bResult = FALSE; break;
+			}
 		}
 
 		// Inject reflective DLL

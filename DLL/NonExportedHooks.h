@@ -6,8 +6,11 @@
 #include "Hooker.h"
 #include "HookedFunctions.h"
 
+// Statically linked files
+
 void HookChromeNSS();
 void HookChromeBoring();
 void HookPutty();
+void HookWinSCP();
 
 #endif
