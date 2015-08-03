@@ -4,25 +4,25 @@ The post-exploitation activities in a penetration test can be challenging if the
 
 # Components
 
-NetRipper.exe - Configures and inject the DLL
-DLL.dll       - Injected DLL, hook apis and save data to files
-netripper.rb  - Metasploit post-exploitation module
+NetRipper.exe - Configures and inject the DLL  
+DLL.dll       - Injected DLL, hook apis and save data to files  
+netripper.rb  - Metasploit post-exploitation module  
 
 # Command line
 
-Injection: NetRipper.exe DLLpath.dll processname.exe
-Example:   NetRipper.exe DLL.dll firefox.exe
+Injection: NetRipper.exe DLLpath.dll processname.exe  
+Example:   NetRipper.exe DLL.dll firefox.exe  
 
 Generate DLL:
 
-  -h,  --help          Print this help message
-  -w,  --write         Full path for the DLL to write the configuration data
-  -l,  --location      Full path where to save data files (default TEMP)
+  -h,  --help          Print this help message  
+  -w,  --write         Full path for the DLL to write the configuration data  
+  -l,  --location      Full path where to save data files (default TEMP)  
 
 Plugins:
 
-  -p,  --plaintext     Capture only plain-text data. E.g. true
-  -d,  --datalimit     Limit capture size per request. E.g. 4096
-  -s,  --stringfinder  Find specific strings. E.g. user,pass,config
+  -p,  --plaintext     Capture only plain-text data. E.g. true  
+  -d,  --datalimit     Limit capture size per request. E.g. 4096  
+  -s,  --stringfinder  Find specific strings. E.g. user,pass,config  
 
-Example: NetRipper.exe -w DLL.dll -l TEMP -p true -d 4096 -s user,pass
+Example: NetRipper.exe -w DLL.dll -l TEMP -p true -d 4096 -s user,pass  
