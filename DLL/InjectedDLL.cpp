@@ -23,7 +23,8 @@ void InstallPlugins()
 	plPlain->ReadCallback  = &Plugin_PlainText;
 	plPlain->WriteCallback = &Plugin_PlainText;
 
-	PluginSystem::InstallPlugin(plPlain);
+	if(DynConfig::GetDataPath().compare("true") == 0 || DynConfig::GetDataPath().compare("TRUE") == 0)
+		PluginSystem::InstallPlugin(plPlain);
 
 	// Data limit plugin
 
@@ -32,7 +33,7 @@ void InstallPlugins()
 	plLimit->ReadCallback  = &Plugin_DataLimit;
 	plLimit->WriteCallback = &Plugin_DataLimit;
 
-	plLimit->SetConfig("4096");
+	plLimit->SetConfig(DynConfig::GetDataLimit());
 
 	PluginSystem::InstallPlugin(plLimit);
 
@@ -43,7 +44,7 @@ void InstallPlugins()
 	plFinder->ReadCallback  = &Plugin_StringFinder;
 	plFinder->WriteCallback = &Plugin_StringFinder;
 
-	plFinder->SetConfig("user,login,pass,database,config");
+	plFinder->SetConfig(DynConfig::GetStringFinder());
 
 	PluginSystem::InstallPlugin(plFinder);
 }

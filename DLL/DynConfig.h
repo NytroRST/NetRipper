@@ -14,20 +14,20 @@ using namespace std;
 
 class DynConfig
 {
-	static string s_sProcessNames;
-	static string s_sProcessIDs;
-	static string s_sPlugins;
 	static string s_sDataPath;
+	static string s_sPlainText;
+	static string s_sDataLimit;
+	static string s_sStringFinder;
 
 	static string Filter(string p_sString);
 	
 public:
 
 	static void Init();
-	static vector<string> GetProcessNames();
-	static vector<DWORD> GetProcessIDs();
-	static vector<string> GetPlugins();
 	static string GetDataPath();
+	static string GetPlainText();
+	static string GetDataLimit();
+	static string GetStringFinder();
 };
 
 #endif

