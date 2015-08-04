@@ -23,7 +23,7 @@ void InstallPlugins()
 	plPlain->ReadCallback  = &Plugin_PlainText;
 	plPlain->WriteCallback = &Plugin_PlainText;
 
-	if(DynConfig::GetDataPath().compare("true") == 0 || DynConfig::GetDataPath().compare("TRUE") == 0)
+	if(DynConfig::GetPlainText().compare("true") == 0 || DynConfig::GetPlainText().compare("TRUE") == 0)
 		PluginSystem::InstallPlugin(plPlain);
 
 	// Data limit plugin
