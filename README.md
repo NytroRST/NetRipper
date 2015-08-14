@@ -60,6 +60,8 @@ Module options (post/windows/gather/netripper):
    STRINGFINDER  user,login,pass,database,config  no        Search for specific strings in captured data
 ```
 
+Set PROCESSNAMES and run.
+
 # Metasploit installation (Kali)
 
 1. cp netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper.rb
