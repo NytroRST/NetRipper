@@ -66,6 +66,8 @@ Module options (post/windows/gather/netripper):
 2. mkdir /usr/share/metasploit-framework/modules/post/windows/gather/netripper
 3. g++ -Wall netripper.cpp -o netripper
 4. cp netripper /usr/share/metasploit-framework/modules/post/windows/gather/netripper/netripper
+5. cd ../Release
+6. cp DLL.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.dll
 
 # Plugins
 
