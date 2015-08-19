@@ -71,6 +71,10 @@ Set PROCESSNAMES and run.
 5. cd ../Release
 6. cp DLL.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.dll
 
+# PowerShell module
+
+@HarmJ0y Added Invoke-NetRipper.ps1 PowerShell implementation of NetRipper.exe
+
 # Plugins
 
 1. PlainText - Allows to capture only plain-text data
