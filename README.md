@@ -104,5 +104,5 @@ Any suggestion is appreciated!
 
 # Author
 
-Ionut Popescu, Senior Penetration Tester at Dell SecureWorks
-Previously - Senior Security Consultant at KPMG Romania
+Ionut Popescu, Senior Penetration Tester at Dell SecureWorks  
+Previously worked as a Senior Security Consultant at KPMG Romania
