@@ -34,12 +34,11 @@ struct EXPORT_ENTRY
 class Process
 {
 public:
-	static DWORD GetFunctionAddress(string p_sFuncName, string p_sDLLName);
-	static vector<EXPORT_ENTRY> GetDLLExports(string p_sModule);
 	static vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 	static SECTION_INFO GetModuleSection(string p_sModule, string p_sSection);
 	static DWORD SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
 	static DWORD SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN);
+	static DWORD SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
 };
 
 #endif

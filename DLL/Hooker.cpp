@@ -2,6 +2,16 @@
 #include "stdafx.h"
 #include "Hooker.h"
 
+// Global vector
+
+vector<HookStruct *> Hooker::s_vHooks;
+
+// Windows hot-patching signature (nops, mov edi, edi)
+
+unsigned char s_ucHotPatchSignature[] = {0x90, 0x90, 0x90, 0x90, 0x90, 0x8B, 0xFF, 0x55, 0x8B, 0xEC};
+unsigned char s_ucJumpBack[]  = {0xEB, 0xF9};
+unsigned char s_ucMovEdiEdi[] = {0x8B, 0xFF};
+
 // Our "naked" hook function
 
 extern "C" __declspec(naked) void Hook()
@@ -25,6 +35,22 @@ extern "C" __declspec(naked) void Hook()
 
 		mov EDX, [EAX + 4]                           // EDX == m_OriginalAddress                           
 		add EAX, 8                                   // EAX == m_OriginalBytes
+
+		// Check for hot-patching
+
+		add EAX, 10									 // Pointer to m_bIsHotPatch
+		add EDX, 5									 // Location for placing mov edi, edi
+		cmp BYTE PTR [EAX], 1						 // Check value of m_bIsHotPatch
+		jne NoHotPatch								 // Hot patching flag is not set
+
+		mov BYTE PTR [EDX], 0x8B					 // Add first byte of mov edi, edi
+		add EDX, 1									 // Go to next byte
+		mov BYTE PTR [EDX], 0xFF					 // Add second byte of mov edi, edi
+		sub EDX, 1									 // Go back
+
+		NoHotPatch:
+		sub EAX, 10									 // Restore original bytes address
+		sub EDX, 5									 // Restore original address
 
 		// Restore bytes
 
@@ -55,10 +81,6 @@ extern "C" __declspec(naked) void Hook()
 	}
 }
 
-// Global vector
-
-vector<HookStruct *> Hooker::s_vHooks;
-
 // Function restores the hook on a function already hooked!
 
 void Hooker::RestoreHook(void *p_pvCallbackAddress)
@@ -69,8 +91,19 @@ void Hooker::RestoreHook(void *p_pvCallbackAddress)
     {
 		if(s_vHooks[i]->m_CallbackAddress == p_pvCallbackAddress) 
 		{
-			memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_JmpBytes, REPLACE_BYTES);
-			FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES);
+			// Check for hot paching
+
+			if(s_vHooks[i]->m_bIsHotPatch) 
+			{
+				memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_JmpBytes, REPLACE_BYTES);
+				memcpy((void *)((DWORD)s_vHooks[i]->m_OriginalAddress + 5), s_ucJumpBack, 2);
+				FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES + 2);
+			}
+			else
+			{
+				memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_JmpBytes, REPLACE_BYTES);
+				FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES);
+			}
 		}
     }
 }
@@ -83,8 +116,17 @@ void Hooker::RemoveHooks()
 
 	for (unsigned i = 0; i < s_vHooks.size(); ++i)
     {
-		memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_OriginalBytes, REPLACE_BYTES);
-		FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES);
+		if(s_vHooks[i]->m_bIsHotPatch) 
+		{
+			memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_OriginalBytes, REPLACE_BYTES);
+			memcpy((void *)((DWORD)s_vHooks[i]->m_OriginalAddress + 5), s_ucMovEdiEdi, 2);		
+			FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES + 2);
+		}
+		else
+		{
+			memcpy(s_vHooks[i]->m_OriginalAddress, s_vHooks[i]->m_OriginalBytes, REPLACE_BYTES);
+			FlushInstructionCache(GetCurrentProcess(), s_vHooks[i]->m_OriginalAddress, REPLACE_BYTES);
+		}
 
 		delete s_vHooks[i];
     }
@@ -109,22 +151,44 @@ bool Hooker::AddHook(void *p_pfFunctionAddress, void *p_pvCallbackAddress)
 	if(p_pfFunctionAddress == NULL || p_pvCallbackAddress == NULL)
 	{
 		DebugLog::Log("[ERROR] Invalid pointer to add HOOK!");
-		MessageBox(0, "Invalid pointer!", "NetRipper", 0);
+		return false;
 	}
 
-	// Original function pointer
-					
-	pHook->m_OriginalAddress = (void *)p_pfFunctionAddress;
-					
-	// Create CALL
-				
-	jump = 0xFFFFFFFF - ((DWORD)pHook->m_OriginalAddress + 4 - (DWORD)Hook);
+	// Check for Windows Hot-Patching
 
-	// Place a CALL (not a JMP)
+	if(memcmp((void *)((DWORD)p_pfFunctionAddress - 5), (void *)(s_ucHotPatchSignature), HOT_PATCH_SIG_LENGTH) == 0)
+	{
+		// Original function pointer
+		
+		pHook->m_bIsHotPatch = true;
+		pHook->m_OriginalAddress = (void *)((DWORD)p_pfFunctionAddress - 5);
+
+		// Create CALL
+				
+		jump = 0xFFFFFFFF - ((DWORD)pHook->m_OriginalAddress + 4 - (DWORD)Hook);
+
+		// Place a CALL (not a JMP)
 					
-	pHook->m_JmpBytes[0] = (char)0xE8;
-	memcpy(&pHook->m_JmpBytes[1], &jump, 4);
+		pHook->m_JmpBytes[0] = (char)0xE8;
+		memcpy(&pHook->m_JmpBytes[1], &jump, 4);
+	}
+	else
+	{
+		// Original function pointer
+		
+		pHook->m_bIsHotPatch = false;
+		pHook->m_OriginalAddress = (void *)p_pfFunctionAddress;
 					
+		// Create CALL
+				
+		jump = 0xFFFFFFFF - ((DWORD)pHook->m_OriginalAddress + 4 - (DWORD)Hook);
+
+		// Place a CALL (not a JMP)
+					
+		pHook->m_JmpBytes[0] = (char)0xE8;
+		memcpy(&pHook->m_JmpBytes[1], &jump, 4);		
+	}
+
 	// Set page permissions
 
 	VirtualProtect(pHook->m_OriginalAddress, 4096, PAGE_EXECUTE_READWRITE, &oldP);
@@ -132,11 +196,12 @@ bool Hooker::AddHook(void *p_pfFunctionAddress, void *p_pvCallbackAddress)
 	// Copy original bytes
 
 	memcpy(pHook->m_OriginalBytes, pHook->m_OriginalAddress, REPLACE_BYTES);
+	if(pHook->m_bIsHotPatch) memcpy((void *)((DWORD)pHook->m_OriginalAddress + 5), s_ucJumpBack, 2);
 
 	// Set hook
 
 	memcpy(pHook->m_OriginalAddress, pHook->m_JmpBytes, REPLACE_BYTES);
-	FlushInstructionCache(GetCurrentProcess(), pHook->m_OriginalAddress, REPLACE_BYTES);
+	FlushInstructionCache(GetCurrentProcess(), pHook->m_OriginalAddress, REPLACE_BYTES + 2);
 
 	// Add struct to vector
 
@@ -183,7 +248,7 @@ HookStruct *Hooker::GetHookStructByOriginalAddress(void *p_pvOriginalAddress)
 		}
     }
 
-	DebugLog::LogString("[ERROR] Cannot get hook by original address: ", Utils::IntToString((unsigned int)p_pvOriginalAddress));
+	DebugLog::LogIntHex("[ERROR] Cannot get hook by original address: ", (DWORD)p_pvOriginalAddress);
 
 	return NULL;
 }

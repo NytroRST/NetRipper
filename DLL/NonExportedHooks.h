@@ -8,8 +8,7 @@
 
 // Statically linked files
 
-void HookChromeNSS();
-void HookChromeBoring();
+void HookChrome();
 void HookPutty();
 void HookWinSCP();
 

@@ -11,7 +11,8 @@ using namespace std;
 
 // Number of bytes to replace
 
-#define REPLACE_BYTES	5
+#define REPLACE_BYTES				5
+#define HOT_PATCH_SIG_LENGTH		10
 
 // Structure to save all hook info
 
@@ -21,6 +22,7 @@ struct HookStruct
 	void *m_OriginalAddress;
 	unsigned char m_OriginalBytes[REPLACE_BYTES];
 	unsigned char m_JmpBytes[REPLACE_BYTES];
+	bool m_bIsHotPatch;
 };
 
 // Hooker class :D

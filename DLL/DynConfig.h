@@ -2,7 +2,6 @@
 #define _DYNCONFIG_H_
 
 #include <string>
-#include <vector>
 #include "DebugLog.h"
 #include "Utils.h"
 

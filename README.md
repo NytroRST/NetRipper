@@ -85,6 +85,14 @@ Set PROCESSNAMES and run.
 2. DataLimit - Save only first bytes of requests and responses
 3. Stringinder - Find specific string in network traffic
 
+# Changelog
+
+Version 1.0.1:
+- Updated project to Visual Studio 2015
+- Added support for "dynamic" function signatures
+- Updated support for Chrome (tested with Chrome 49)
+- Thread-safe Win32 API hooking
+
 # To do
 
 - Support multiple applications
@@ -96,4 +104,5 @@ Any suggestion is appreciated!
 
 # Author
 
-Ionut Popescu, Senior Security Consultant at KPMG Romania
+Ionut Popescu, Senior Penetration Tester at Dell SecureWorks
+Previously - Senior Security Consultant at KPMG Romania

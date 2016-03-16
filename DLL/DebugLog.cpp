@@ -88,6 +88,8 @@ void DebugLog::Log(const char *p_pc_Data, unsigned int p_nLength)
 	if(nWritten != p_nLength)
 	{
 		DebugLog::DebugError("[ERROR] Cannot write to debug file!");
+		fclose(pFile);
+		return;
 	}
 
 	// Write \r\n
@@ -102,10 +104,10 @@ void DebugLog::Log(const char *p_pc_Data, unsigned int p_nLength)
 	fclose(pFile);
 }
 
-// Log critical errors: MessageBox, only for debug
+// Log critical errors: Debug string, only for debug
 
 void DebugLog::DebugError(string p_sString)
 {
-	MessageBox(0, p_sString.c_str(), "Critical error", 0);
+	OutputDebugString(p_sString.c_str());
 }
 
