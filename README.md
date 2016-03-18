@@ -87,6 +87,10 @@ Set PROCESSNAMES and run.
 
 # Changelog
 
+Version 1.0.2:
+- Added support for SecureCRT 7.3
+- Added basic support for "__thiscall"
+
 Version 1.0.1:
 - Updated project to Visual Studio 2015
 - Added support for "dynamic" function signatures
