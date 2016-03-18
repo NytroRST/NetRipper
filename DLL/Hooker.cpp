@@ -23,6 +23,10 @@ extern "C" __declspec(naked) void Hook()
 		mov EAX, [ESP]                               // Get EIP_CALLING
 		sub EAX, 5                                   // Sizeof call
 
+		// Backup ECX to support __thiscall
+
+		push ECX
+
 		// Get and parse HookStruct
 
 		push EAX                                     // Function parameter
@@ -72,6 +76,10 @@ extern "C" __declspec(naked) void Hook()
 		call DWORD PTR [FlushInstructionCache]       // FlushInstructionCache(-1, m_OriginalAddress, REPLACE_BYTES)
 
 		pop EAX                                      // Restore register
+
+		// Restore ECX for __thiscall
+
+		pop ECX
 
 		// Call callback function
 

@@ -138,3 +138,4 @@ void HookWinSCP()
 	Hooker::AddHook((void *)pSend, (void *)SSH_Pktsend_Callback);
 	Hooker::AddHook((void *)pRecv, (void *)SSH_Rdpkt_Callback);
 }
+

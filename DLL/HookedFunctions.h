@@ -40,6 +40,16 @@ int SSL_Write_Callback(void *fd, void *buffer, DWORD amount);
 
 // =============================================================================================//
 
+// SecureCRT_Write
+
+typedef int(__stdcall *SecureCRT_Typedef)(unsigned char **data, DWORD);
+
+// Callback
+
+int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size);
+
+// =============================================================================================//
+
 // PuttySend, PuttyRecv
 
 typedef void (*PuttySend_Typedef)(void *handle, char *buf, int len, int interactive);
@@ -171,6 +181,8 @@ extern DecryptMessage_Typedef DecryptMessage_Original;
 
 extern PuttySend_Typedef PuttySend_Original;
 extern PuttyRecv_Typedef PuttyRecv_Original;
+
+extern SecureCRT_Typedef SecureCRT_Original;
 
 // =============================================================================================//
 
