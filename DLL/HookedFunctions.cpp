@@ -55,7 +55,6 @@ int PR_Write_Callback(void *fd, void *buffer, DWORD amount)
 	res = PR_Write_Original(fd, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PR_Write_Callback);
 
 	return res;
 }
@@ -76,7 +75,6 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PR_Read_Callback);
 
 	return ret;
 }
@@ -99,7 +97,6 @@ int SSL_Write_Callback(void *fd, void *buffer, DWORD amount)
 	res = SSL_Write_Original(fd, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SSL_Write_Callback);
 
 	return res;
 }
@@ -120,7 +117,6 @@ int SSL_Read_Callback(void *fd, void *buffer, DWORD amount)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SSL_Read_Callback);
 
 	return ret;
 }
@@ -146,7 +142,6 @@ int PR_Send_Callback(void *fd, const void *buf, int amount, int flags, DWORD tim
 	res = PR_Send_Original(fd, buf, amount, flags, timeout);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PR_Send_Callback);
 
 	return res;
 }
@@ -167,7 +162,6 @@ int PR_Recv_Callback(void *fd, void *buf, int amount, int flags, DWORD timeout)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PR_Recv_Callback);
 
 	return ret;
 }
@@ -193,7 +187,6 @@ LONG __stdcall SslEncryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 	res = SslEncryptPacket_Original(hSslProvider, hKey, pbInput, cbInput, pbOutput, cbOutput, pcbResult, SequenceNumber, dwContentType, dwFlags);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SslEncryptPacket_Callback);
 
 	return res;
 }
@@ -215,7 +208,6 @@ LONG __stdcall SslDecryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SslDecryptPacket_Callback);
 
 	return res;
 }
@@ -241,7 +233,6 @@ int __stdcall send_Callback(int s, char *buf, int len, int flags)
 	res = send_Original(s, buf, len, flags);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)send_Callback);
 
 	return res;
 }
@@ -262,7 +253,6 @@ int __stdcall recv_Callback(int s, char *buf, int len, int flags)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)recv_Callback);
 
 	return ret;
 }
@@ -292,7 +282,6 @@ int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 	res = WSASend_Original(s, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags, lpOverlapped, lpCompletionRoutine);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)WSASend_Callback);
 
 	return res;
 }
@@ -319,7 +308,6 @@ int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)WSARecv_Callback);
 
 	return ret;
 }
@@ -351,7 +339,6 @@ SECURITY_STATUS __stdcall EncryptMessage_Callback(PCtxtHandle phContext, ULONG f
 	res = EncryptMessage_Original(phContext, fQOP, pMessage, MessageSeqNo);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)EncryptMessage_Callback);
 
 	return res;
 }
@@ -383,7 +370,6 @@ SECURITY_STATUS __stdcall DecryptMessage_Callback(PCtxtHandle phContext, PSecBuf
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)WSARecv_Callback);
 
 	return ret;
 }
@@ -404,7 +390,6 @@ void PuttySend_Callback(void *handle, char *buf, int len, int interactive)
 	PuttySend_Original(handle, buf, len, interactive);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PuttySend_Callback);
 }
 
 // PuttyRecv callback
@@ -422,7 +407,6 @@ int PuttyRecv_Callback(void *term, int is_stderr, const char *data, int len)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)PuttyRecv_Callback);
 
 	return ret;
 }
@@ -443,7 +427,6 @@ void SSH_Pktsend_Callback(void *ssh, Packet *pkt)
 	SSH_Pktsend_Original(ssh, pkt);
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SSH_Pktsend_Callback);
 }
 
 // SSH_Rdpkt - WinSCP receive callback
@@ -463,7 +446,6 @@ Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SSH_Rdpkt_Callback);
 
 	return pkt;
 }
@@ -472,8 +454,10 @@ Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen)
 
 int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 {
+#if defined _M_IX86
 	DWORD ecx_bkp = 0;
 	__asm { mov ecx_bkp, ecx };
+#endif
 
 	// Stuff required to avoid overwriting ECX
 	
@@ -482,7 +466,9 @@ int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 	
 	BOOL bFlag = FunctionFlow::CheckFlag();
 
+#if defined _M_IX86
 	__asm { mov ecx, ecx_bkp };
+#endif
 
 	int ret = SecureCRT_Original(temp_data, temp_size);
 
@@ -494,7 +480,6 @@ int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 	}
 
 	FunctionFlow::UnCheckFlag();
-	Hooker::RestoreHook((void *)SecureCRT_Callback);
 
 	return ret;
 }

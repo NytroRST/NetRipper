@@ -11,11 +11,19 @@
 
 using namespace std;
 
+// Address type
+
+#if defined _M_X64
+#define ADDRESS_VALUE uint64_t
+#elif defined _M_IX86
+#define ADDRESS_VALUE uint32_t
+#endif
+
 // Struct for sections
 
 struct SECTION_INFO
 {
-	DWORD dwStartAddress;
+	ADDRESS_VALUE dwStartAddress;
 	DWORD dwSize;
 };
 
@@ -23,8 +31,8 @@ struct SECTION_INFO
 
 struct EXPORT_ENTRY
 {
-	DWORD  dwAddress;
-	DWORD  dwPointerOfAddress;
+	ADDRESS_VALUE dwAddress;
+	ADDRESS_VALUE dwPointerOfAddress;
 	string sName;
 	USHORT uOrdinal;
 };
@@ -36,9 +44,9 @@ class Process
 public:
 	static vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 	static SECTION_INFO GetModuleSection(string p_sModule, string p_sSection);
-	static DWORD SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
-	static DWORD SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN);
-	static DWORD SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
+	static ADDRESS_VALUE SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
+	static ADDRESS_VALUE SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN);
+	static ADDRESS_VALUE SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
 };
 
 #endif

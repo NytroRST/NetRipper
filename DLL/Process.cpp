@@ -4,7 +4,7 @@
 
 // Search in memory
 
-DWORD Process::SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)
+ADDRESS_VALUE Process::SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)
 {
 	unsigned char *pByte = (unsigned char *)p_pvStartAddress;
 
@@ -12,7 +12,7 @@ DWORD Process::SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBu
 	{
 		if(memcmp(pByte + i, p_pvBuffer, p_dwBufferSize) == 0)
 		{
-			return (DWORD)(pByte + i);
+			return (ADDRESS_VALUE)(pByte + i);
 		}
 	}
 
@@ -23,7 +23,7 @@ DWORD Process::SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBu
 
 // Search in memory and return N'th occurence 
 
-DWORD Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN)
+ADDRESS_VALUE Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN)
 {
 	unsigned char *pByte = (unsigned char *)p_pvStartAddress;
 	unsigned int n = 0;
@@ -35,7 +35,7 @@ DWORD Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_p
 		if(memcmp(pByte + i, p_pvBuffer, p_dwBufferSize) == 0)
 		{
 			n++;
-			if(n == p_nN) return (DWORD)(pByte + i);
+			if(n == p_nN) return (ADDRESS_VALUE)(pByte + i);
 		}
 	}
 
@@ -46,9 +46,9 @@ DWORD Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_p
 
 // Seach a signature
 
-DWORD Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)
+ADDRESS_VALUE Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)
 {
-	DWORD dwMax = (DWORD)p_pvStartAddress + p_dwSize;
+	ADDRESS_VALUE dwMax = (ADDRESS_VALUE)p_pvStartAddress + p_dwSize;
 	unsigned char c1 = 0, c2 = 0;
 	bool bOk = false;
 
@@ -60,8 +60,8 @@ DWORD Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_p
 		{
 			// c1 = from memory, c2 = from signature
 			
-			c1 = *(unsigned char *)((DWORD)p_pvStartAddress + i + j);
-			c2 = *(unsigned char *)((DWORD)p_pvBuffer + j);
+			c1 = *(unsigned char *)((ADDRESS_VALUE)p_pvStartAddress + i + j);
+			c2 = *(unsigned char *)((ADDRESS_VALUE)p_pvBuffer + j);
 
 			// Check character
 
@@ -79,7 +79,7 @@ DWORD Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_p
 
 		// Check if we found the signature
 
-		if(bOk) return (DWORD)p_pvStartAddress + i;
+		if(bOk) return (ADDRESS_VALUE)p_pvStartAddress + i;
 	}
 
 	DebugLog::Log("[ERROR] SearchSignature did not find the signature!");
@@ -124,7 +124,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 			// Get DOS/PE header
 
 			memcpy(&dos, (void *)hModule, sizeof(IMAGE_DOS_HEADER));
-			memcpy(&ntHeaders, (void *)((DWORD)hModule + dos.e_lfanew), sizeof(IMAGE_NT_HEADERS));
+			memcpy(&ntHeaders, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew), sizeof(IMAGE_NT_HEADERS));
 
 			// Get sections
 
@@ -138,7 +138,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 
 			// Copy
 
-			memcpy(pSections, (void *)((DWORD)hModule + dos.e_lfanew + sizeof(IMAGE_NT_HEADERS)), 
+			memcpy(pSections, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew + sizeof(IMAGE_NT_HEADERS)),
 				(ntHeaders.FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER)));
 
 			// Print
@@ -148,7 +148,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 				if(p_sSection.compare((char *)pSections[j].Name) == 0)
 				{
 					oSectionData.dwSize = pSections[j].SizeOfRawData;
-					oSectionData.dwStartAddress = (DWORD)hModule +  pSections[j].VirtualAddress;
+					oSectionData.dwStartAddress = (ADDRESS_VALUE)hModule +  pSections[j].VirtualAddress;
 
 					return oSectionData;
 				}

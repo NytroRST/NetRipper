@@ -55,7 +55,7 @@ string Utils::GetFilename(string p_sFilename)
 
 		string sFullPath = pcBuffer;
 		
-		int i = sFullPath.find_last_of('\\');
+		size_t i = sFullPath.find_last_of('\\');
 		if (i != string::npos)
 			sFullPath = sFullPath.substr(i+1); 
 		
@@ -150,8 +150,8 @@ string Utils::IntToHex(unsigned int p_nNumer)
 
 string Utils::GetStringBetween(string p_sString, string p_sStart, string p_sStop)
 {
-    int start = p_sString.find(p_sStart);
-    int end = p_sString.find(p_sStop, start);
+    size_t start = p_sString.find(p_sStart);
+	size_t end = p_sString.find(p_sStop, start);
     string substring = "";
 
 	// Get strings

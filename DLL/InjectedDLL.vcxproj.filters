@@ -29,9 +29,6 @@
     <ClInclude Include="Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Hooker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HookedFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -74,9 +71,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Process.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Hooker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HookedFunctions.cpp">

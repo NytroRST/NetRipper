@@ -52,7 +52,7 @@ void DebugLog::LogIntHex(string p_sData, DWORD p_dwInt)
 
 // Log data to specified file
 
-void DebugLog::Log(const char *p_pc_Data, unsigned int p_nLength)
+void DebugLog::Log(const char *p_pc_Data, size_t p_nLength)
 {
 	string sFilename = DebugLog::s_sFolder;
 	FILE *pFile = NULL;

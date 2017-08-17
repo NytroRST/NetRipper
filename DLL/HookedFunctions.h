@@ -4,11 +4,11 @@
 
 #define SECURITY_WIN32
 
-#include "Hooker.h"
 #include "Utils.h"
 #include "DebugLog.h"
 #include "FunctionFlow.h"
 #include "PluginSystem.h"
+#include "Minhook.h"
 #include <WinSock2.h>
 #include <Security.h>
 #include <stdio.h>

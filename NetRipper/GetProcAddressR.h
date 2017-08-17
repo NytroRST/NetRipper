@@ -30,6 +30,14 @@
 //===============================================================================================//
 #include "ReflectiveDLLInjection.h"
 
+// Address type
+
+#if defined _M_X64
+#define ADDRESS_VALUE unsigned long long
+#elif defined _M_IX86
+#define ADDRESS_VALUE unsigned int
+#endif
+
 FARPROC WINAPI GetProcAddressR( HANDLE hModule, LPCSTR lpProcName );
 //===============================================================================================//
 #endif

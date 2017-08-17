@@ -87,6 +87,9 @@ Set PROCESSNAMES and run.
 
 # Changelog
 
+Version 1.1:
+- Initial support for x64 (using minhook library)
+
 Version 1.0.2:
 - Added support for SecureCRT 7.3
 - Added basic support for "__thiscall"
@@ -100,13 +103,10 @@ Version 1.0.1:
 # To do
 
 - Support multiple applications
-- Support for x64 processes
-- Thread-safe API hooking
 - Monitor loading of DLLs and new processes
 
 Any suggestion is appreciated!
 
 # Author
 
-Ionut Popescu, Senior Penetration Tester at Dell SecureWorks  
-Previously worked as a Senior Security Consultant at KPMG Romania
+Ionut Popescu

@@ -35,7 +35,7 @@
 
 // Modified: define platform
 
-#define WIN_X86
+// #define WIN_X86
 #define REFLECTIVEDLLINJECTION_CUSTOM_DLLMAIN
 
 #include "ReflectiveDLLInjection.h"

@@ -24,7 +24,7 @@ public:
 	static void Init();
 
 	static void Log(string p_sData);
-	static void Log(const char *p_pc_Data, unsigned int p_nLength);
+	static void Log(const char *p_pc_Data, size_t p_nLength);
 
 	static void LogString(string p_sData, string p_sString);
 	static void LogInt(string p_sData, DWORD p_dwInt);

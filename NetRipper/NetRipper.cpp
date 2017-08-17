@@ -675,27 +675,6 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 			bResult = FALSE; break;
 		}
 
-		// Check if Windows is 64 bit
-
-		if(IsWindows64())
-		{
-			// Check if process is 32 bit
-
-			bResult = IsWow64Process(hProcess, &bIs32Bit);
-
-			if(bResult == 0)
-			{
-				cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
-				bResult = FALSE; break;
-			}
-
-			if(!bIs32Bit)
-			{
-				cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
-				bResult = FALSE; break;
-			}
-		}
-
 		// Inject reflective DLL
 
 		hModule = LoadRemoteLibraryR( hProcess, lpBuffer, dwLength, NULL );
