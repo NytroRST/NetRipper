@@ -68,8 +68,8 @@ Set PROCESSNAMES and run.
 
 # Metasploit installation (Kali)
 
-1. cp netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper.rb
-2. mkdir /usr/share/metasploit-framework/modules/post/windows/gather/netripper
+1. mkdir /usr/share/metasploit-framework/modules/post/windows/gather/netripper
+2. cp netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper.rb
 3. g++ -Wall netripper.cpp -o netripper
 4. cp netripper /usr/share/metasploit-framework/modules/post/windows/gather/netripper/netripper
 5. cd ../Release
