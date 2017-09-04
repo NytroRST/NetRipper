@@ -87,6 +87,9 @@ Set PROCESSNAMES and run.
 
 # Changelog
 
+Version 1.1.1:
+- Changed DLL configuration process
+
 Version 1.1:
 - Initial support for x64 (using minhook library)
 
