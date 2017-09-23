@@ -8,8 +8,8 @@ PR_Write_Typedef PR_Write_Original;
 PR_Read_Typedef PR_Read_Original;
 PR_GetDescType_Typedef PR_GetDescType_Original;
 
-SSL_Read_Typedef SSL_Read_Original;
 SSL_Write_Typedef SSL_Write_Original;
+SSL_Read_Typedef SSL_Read_Original;
 
 PR_Send_Typedef PR_Send_Original;
 PR_Recv_Typedef PR_Recv_Original;
@@ -81,7 +81,7 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 
 // SSL_Write callback
 
-int SSL_Write_Callback(void *fd, void *buffer, DWORD amount)
+int SSL_Write_Callback(void *fd, void *handshake, void *buffer, int amount)
 {
 	LONG res;
 
@@ -94,7 +94,7 @@ int SSL_Write_Callback(void *fd, void *buffer, DWORD amount)
 
 	// Call original function
 	
-	res = SSL_Write_Original(fd, buffer, amount);
+	res = SSL_Write_Original(fd, handshake, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
 
@@ -103,17 +103,16 @@ int SSL_Write_Callback(void *fd, void *buffer, DWORD amount)
 
 // SSL_Read callback
 
-int SSL_Read_Callback(void *fd, void *buffer, DWORD amount)
+int SSL_Read_Callback(void *fd, void *handshake, void *buffer, int amount, int peak)
 {
 	BOOL bFlag = FunctionFlow::CheckFlag();
-	signed int ret = SSL_Read_Original(fd, buffer, amount);
+	int ret = SSL_Read_Original(fd, handshake, buffer, amount, peak);
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(ret > 0)
-			PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
+		if(ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();

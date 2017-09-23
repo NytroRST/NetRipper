@@ -12,8 +12,8 @@ string DynConfig::s_sStringFinder = "user,login,pass,database,config";
 // Default settings
 
 string DynConfig::s_sConfigurationString = 
-	"<NetRipper>ConfigurationData</NetRipper>------------------------------------------------------------"
-	"----------------------------------------------------------------------------------------------------"
+	"<NetRipper><plaintext>true</plaintext><datalimit>4096</datalimit><stringfinder>user,login,pass,datab"
+	"ase,config</stringfinder><data_path>TEMP</data_path></NetRipper>------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"

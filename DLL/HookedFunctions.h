@@ -30,13 +30,13 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount);
 
 // SSL_Read, SSL_Write
 
-typedef int (*SSL_Write_Typedef)(void *, void *, DWORD);
-typedef int (*SSL_Read_Typedef)(void *, void *, DWORD);
+typedef int (*SSL_Write_Typedef)(void *, void *, void *, int);
+typedef int (*SSL_Read_Typedef)(void *, void *, void *, int, int);
 
 // Callbacks
 
-int SSL_Read_Callback(void *fd, void *buffer, DWORD amount);
-int SSL_Write_Callback(void *fd, void *buffer, DWORD amount);
+int SSL_Write_Callback(void *ssl, void *handshake, void *buffer, int amount);
+int SSL_Read_Callback(void *ssl, void *handshake, void *buffer, int amount, int peak);
 
 // =============================================================================================//
 
@@ -158,8 +158,8 @@ extern PR_Write_Typedef PR_Write_Original;
 extern PR_Read_Typedef PR_Read_Original;
 extern PR_GetDescType_Typedef PR_GetDescType_Original;
 
-extern SSL_Read_Typedef SSL_Read_Original;
 extern SSL_Write_Typedef SSL_Write_Original;
+extern SSL_Read_Typedef SSL_Read_Original;
 
 extern PR_Send_Typedef PR_Send_Original;
 extern PR_Recv_Typedef PR_Recv_Original;
