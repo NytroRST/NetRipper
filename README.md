@@ -87,6 +87,9 @@ Set PROCESSNAMES and run.
 
 # Changelog
 
+Version 1.1.2:
+- Added Chrome x64 support
+
 Version 1.1.1:
 - Changed DLL configuration process
 
