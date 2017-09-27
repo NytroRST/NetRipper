@@ -72,8 +72,10 @@ Set PROCESSNAMES and run.
 2. cp netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper.rb
 3. g++ -Wall netripper.cpp -o netripper
 4. cp netripper /usr/share/metasploit-framework/modules/post/windows/gather/netripper/netripper
-5. cd ../Release
+5. cd ../Win32 
 6. cp DLL.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.dll
+
+Note: Support for x64 on the Metasploit module will be added soon.
 
 # PowerShell module
 
