@@ -127,10 +127,10 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 			memcpy(&ntHeaders, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew), sizeof(IMAGE_NT_HEADERS));
 
 			// Get sections
-
-			pSections = new IMAGE_SECTION_HEADER[ntHeaders.FileHeader.NumberOfSections];
-
-			if(pSections == NULL)
+			try {
+				pSections = new IMAGE_SECTION_HEADER[ntHeaders.FileHeader.NumberOfSections];
+			}
+			catch (std::bad_alloc& ba)
 			{
 				DebugLog::LogInt("[ERROR] Cannot allocate space for sections: ", ntHeaders.FileHeader.NumberOfSections);
 				return oSectionData;
@@ -149,7 +149,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 				{
 					oSectionData.dwSize = pSections[j].SizeOfRawData;
 					oSectionData.dwStartAddress = (ADDRESS_VALUE)hModule +  pSections[j].VirtualAddress;
-
+					delete pSections;
 					return oSectionData;
 				}
 			}
@@ -157,7 +157,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 	}
 
 	DebugLog::LogString("[ERROR] GetModuleSection did not find the section: ", p_sSection);
-
+	delete pSections;
 	return oSectionData;
 }
 
