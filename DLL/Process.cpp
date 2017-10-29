@@ -130,7 +130,7 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 			try {
 				pSections = new IMAGE_SECTION_HEADER[ntHeaders.FileHeader.NumberOfSections];
 			}
-			catch (std::bad_alloc& ba)
+			catch (std::bad_alloc&)
 			{
 				DebugLog::LogInt("[ERROR] Cannot allocate space for sections: ", ntHeaders.FileHeader.NumberOfSections);
 				return oSectionData;
@@ -153,11 +153,13 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 					return oSectionData;
 				}
 			}
+
+			delete[] pSections;
 		}
 	}
 
 	DebugLog::LogString("[ERROR] GetModuleSection did not find the section: ", p_sSection);
-	delete pSections;
+	
 	return oSectionData;
 }
 

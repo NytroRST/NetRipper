@@ -89,6 +89,9 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.4:
+- Support for Chrome 62
+
 Version 1.1.3:
 - Three issues fixed by ip-gpu
 
