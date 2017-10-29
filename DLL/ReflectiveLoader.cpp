@@ -239,8 +239,7 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 					uiAddressArray += ( DEREF_16( uiNameOrdinals ) * sizeof(DWORD) );
 
 					// store this functions VA
-					if( dwHashValue == NTFLUSHINSTRUCTIONCACHE_HASH )
-						pNtFlushInstructionCache = (NTFLUSHINSTRUCTIONCACHE)( uiBaseAddress + DEREF_32( uiAddressArray ) );
+					pNtFlushInstructionCache = (NTFLUSHINSTRUCTIONCACHE)( uiBaseAddress + DEREF_32( uiAddressArray ) );
 
 					// decrement our counter
 					usCounter--;
