@@ -103,10 +103,10 @@ int SSL_Write_Callback(void *fd, void *handshake, void *buffer, int amount)
 
 // SSL_Read callback
 
-int SSL_Read_Callback(void *fd, void *handshake, void *buffer, int amount, int peak)
+int SSL_Read_Callback(void *fd, void *buffer, int amount)
 {
 	BOOL bFlag = FunctionFlow::CheckFlag();
-	int ret = SSL_Read_Original(fd, handshake, buffer, amount, peak);
+	int ret = SSL_Read_Original(fd, buffer, amount);
 
 	// Do things
 
