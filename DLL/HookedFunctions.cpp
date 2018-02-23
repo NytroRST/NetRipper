@@ -8,8 +8,11 @@ PR_Write_Typedef PR_Write_Original;
 PR_Read_Typedef PR_Read_Original;
 PR_GetDescType_Typedef PR_GetDescType_Original;
 
-SSL_Write_Typedef SSL_Write_Original;
-SSL_Read_Typedef SSL_Read_Original;
+SSL_Write_Typedef64 SSL_Write_Original64;
+SSL_Read_Typedef64 SSL_Read_Original64;
+
+SSL_Write_Typedef32 SSL_Write_Original32;
+SSL_Read_Typedef32 SSL_Read_Original32;
 
 PR_Send_Typedef PR_Send_Original;
 PR_Recv_Typedef PR_Recv_Original;
@@ -79,9 +82,9 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 	return ret;
 }
 
-// SSL_Write callback
+// SSL_Write callback 64 bits
 
-int SSL_Write_Callback(void *fd, void *handshake, void *buffer, int amount)
+int SSL_Write_Callback64(void *fd, void *handshake, void *buffer, int amount)
 {
 	LONG res;
 
@@ -94,25 +97,66 @@ int SSL_Write_Callback(void *fd, void *handshake, void *buffer, int amount)
 
 	// Call original function
 	
-	res = SSL_Write_Original(fd, handshake, buffer, amount);
+	res = SSL_Write_Original64(fd, handshake, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
 
 	return res;
 }
 
-// SSL_Read callback
+// SSL_Read callback 64 bits
 
-int SSL_Read_Callback(void *fd, void *buffer, int amount)
+int SSL_Read_Callback64(void *fd, void *buffer, int amount)
 {
 	BOOL bFlag = FunctionFlow::CheckFlag();
-	int ret = SSL_Read_Original(fd, buffer, amount);
+	int ret = SSL_Read_Original64(fd, buffer, amount);
 
 	// Do things
 
 	if (bFlag == FALSE)
 	{
 		if(ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
+	}
+
+	FunctionFlow::UnCheckFlag();
+
+	return ret;
+}
+
+// SSL_Write callback 32 bits
+
+int SSL_Write_Callback32(void *fd, void *buffer, int amount)
+{
+	LONG res;
+
+	// If allowed
+
+	if (FunctionFlow::CheckFlag() == FALSE)
+	{
+		PluginSystem::ProcessAndSaveWrite("SSL_Write.txt", (unsigned char *)buffer, amount);
+	}
+
+	// Call original function
+
+	res = SSL_Write_Original32(fd, buffer, amount);
+
+	FunctionFlow::UnCheckFlag();
+
+	return res;
+}
+
+// SSL_Read callback 32 bits
+
+int SSL_Read_Callback32(void *fd, void *buffer, int amount)
+{
+	BOOL bFlag = FunctionFlow::CheckFlag();
+	int ret = SSL_Read_Original32(fd, buffer, amount);
+
+	// Do things
+
+	if (bFlag == FALSE)
+	{
+		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();

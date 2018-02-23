@@ -89,8 +89,11 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.6:
+- Support for Chrome 64 (32 bits)
+
 Version 1.1.5:
-- Support for Chrome 64 (only 64 bits)
+- Support for Chrome 64 (64 bits)
 
 Version 1.1.4:
 - Support for Chrome 62
