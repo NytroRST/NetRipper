@@ -89,6 +89,9 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.7:
+- Added --noreflective for classic injection
+
 Version 1.1.6:
 - Support for Chrome 64 (32 bits)
 
