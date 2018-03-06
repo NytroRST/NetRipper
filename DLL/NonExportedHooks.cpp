@@ -85,10 +85,10 @@ void HookChrome()
 void HookPutty()
 {
 	SECTION_INFO text  = {0, 0};
-	unsigned char SEND_string[] = {0x51, 0x53, 0x55, 0x56, 0x8b, 0x74, 0x24, 0x14, 0x57, 0x8b, 
-		0x7c, 0x24, 0x20, 0x33, 0xed, 0x3b, 0xfd, 0x89, 0x6c, 0x24, 0x10 };
-	unsigned char RECV_string[] = {0x56, 0xff, 0x74, 0x24, 0x14, 0x8b, 0x74, 0x24, 0x0c, 0xff, 
-		0x74, 0x24, 0x14, 0x8d, 0x46, 0x60, 0x50, 0xe8};
+	unsigned char SEND_string[] = { 0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x0C, 0x8B, 0x74, 0x24, 
+		0x20, 0x8B, 0x7C, 0x24, 0x28, 0x83, 0x3E, 0x00, 0x75, 0x17 };
+	unsigned char RECV_string[] = { 0x56, 0x8B, 0x74, 0x24, 0x08, 0x8D, 0x46, 0x60, 0xFF, 0x74, 
+		0x24, 0x14, 0xFF, 0x74, 0x24, 0x14, 0x50, 0xE8 };
 
 	//Get .text section
 
@@ -102,8 +102,8 @@ void HookPutty()
 
 	// Serach functions
 
-	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 21);
-	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 18);
+	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, sizeof(SEND_string));
+	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, sizeof(RECV_string));
 
 	if(pSend == 0 || pRecv == 0)
 	{
@@ -116,8 +116,8 @@ void HookPutty()
 	PuttySend_Original = (PuttySend_Typedef)pSend;
 	PuttyRecv_Original = (PuttyRecv_Typedef)pRecv;
 
-	MH_CreateHook((void *)pSend, (void *)PuttySend_Callback, &((void *)pSend));
-	MH_CreateHook((void *)pRecv, (void *)PuttyRecv_Callback, &((void *)pRecv));
+	MH_CreateHook((void *)pSend, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
+	MH_CreateHook((void *)pRecv, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
 }
 
 // Hook WinSCP

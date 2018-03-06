@@ -89,6 +89,9 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.8:
+- Support for Putty 0.7.0 (32 bits)
+
 Version 1.1.7:
 - Added --noreflective for classic injection
 
