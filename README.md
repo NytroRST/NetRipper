@@ -89,6 +89,9 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.10:
+- Support for Chrome 65 (64 bits)
+
 Version 1.1.9:
 - Support for Putty 0.7.0 (64 bits)
 

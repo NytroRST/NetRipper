@@ -84,7 +84,7 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 
 // SSL_Write callback 64 bits
 
-int SSL_Write_Callback64(void *fd, void *handshake, void *buffer, int amount)
+int SSL_Write_Callback64(void *fd, void *buffer, int amount)
 {
 	LONG res;
 
@@ -97,7 +97,7 @@ int SSL_Write_Callback64(void *fd, void *handshake, void *buffer, int amount)
 
 	// Call original function
 	
-	res = SSL_Write_Original64(fd, handshake, buffer, amount);
+	res = SSL_Write_Original64(fd, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
 

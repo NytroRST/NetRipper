@@ -30,12 +30,12 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount);
 
 // SSL_Read, SSL_Write
 
-typedef int (*SSL_Write_Typedef64)(void *, void *, void *, int);
+typedef int (*SSL_Write_Typedef64)(void *, void *, int);
 typedef int (*SSL_Read_Typedef64)(void *, void *, int);
 
 // Callbacks
 
-int SSL_Write_Callback64(void *ssl, void *handshake, void *buffer, int amount);
+int SSL_Write_Callback64(void *ssl, void *buffer, int amount);
 int SSL_Read_Callback64(void *ssl, void *buffer, int amount);
 
 // Versions for 32 bits
