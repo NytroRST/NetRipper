@@ -84,25 +84,15 @@ int PR_Recv_Callback(void *fd, void *buf, int amount, int flags, DWORD timeout);
 
 // =============================================================================================//
 
-// Used by WinSCP
+// SSH_Rdpkt
 
-struct Packet {
-    long length;
-    long forcepad;
-    int type;
-    unsigned long sequence; 
-    unsigned char *data;
-};
-
-// SSH_Rdpkt, PR_Recv
-
-typedef Packet* (*SSH_Rdpkt_Typedef)(void *ssh, unsigned char **data, int *datalen);
-typedef void (*SSH_Pktsend_Typedef)(void *ssh, Packet *pkt);
+typedef int (__fastcall *SSH_Rdpkt_Typedef)(int datalen, unsigned char *data);
+typedef void (__fastcall *SSH_Pktsend_Typedef)(int datalen, unsigned char *data);
 
 // Callbacks
 
-Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen);
-void SSH_Pktsend_Callback(void *ssh, Packet *pkt);
+int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data);
+void __fastcall SSH_Pktsend_Callback(int datalen, unsigned char *data);
 
 // =============================================================================================//
 

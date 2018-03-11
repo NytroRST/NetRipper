@@ -89,6 +89,9 @@ Note: Support for x64 on the Metasploit module will be added soon.
 
 # Changelog
 
+Version 1.1.12:
+- Support for WinSCP 5.1.3
+
 Version 1.1.11:
 - Support for Chrome 65 (32 bits)
 

