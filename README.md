@@ -48,20 +48,22 @@ Example: NetRipper.exe -w DLL.dll -l TEMP -p true -d 4096 -s user,pass
 # Metasploit module
 
 ```
-msf > use post/windows/gather/netripper 
-msf post(netripper) > show options
+msf exploit(multi/handler) > use post/windows/gather/netripper/netripper 
+msf post(windows/gather/netripper/netripper) > show options
 
-Module options (post/windows/gather/netripper):
+Module options (post/windows/gather/netripper/netripper):
 
-   Name          Current Setting                  Required  Description
-   ----          ---------------                  --------  -----------
-   DATALIMIT     4096                             no        The number of bytes to save from requests/responses
-   DATAPATH      TEMP                             no        Where to save files. E.g. C:\Windows\Temp or TEMP
-   PLAINTEXT     true                             no        True to save only plain-text data
-   PROCESSIDS                                     no        Process IDs. E.g. 1244,1256
-   PROCESSNAMES                                   no        Process names. E.g. firefox.exe,chrome.exe
-   SESSION                                        yes       The session to run this module on.
-   STRINGFINDER  user,login,pass,database,config  no        Search for specific strings in captured data
+   Name          Current Setting  Required  Description
+   ----          ---------------  --------  -----------
+   DATALIMIT     65535            no        The number of bytes to save from requests/responses
+   DATAPATH      TEMP             no        Where to save files. E.g. C:\Windows\Temp or TEMP
+   DLLPATH                        no        Where to find NetRipper DLLs. Default is /usr/share/metasploit-framework...
+   PLAINTEXT     false            no        True to save only plain-text data
+   PROCESSIDS                     no        Process IDs. E.g. 1244,1256
+   PROCESSNAMES                   no        Process names. E.g. firefox.exe,chrome.exe
+   SESSION                        yes       The session to run this module on.
+   STRINGFINDER  DEFAULT          no        Search for specific strings in captured data
+
 ```
 
 Set PROCESSNAMES and run.
@@ -69,79 +71,20 @@ Set PROCESSNAMES and run.
 # Metasploit installation (Kali)
 
 1. mkdir /usr/share/metasploit-framework/modules/post/windows/gather/netripper
-2. cp netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper.rb
-3. g++ -Wall netripper.cpp -o netripper
-4. cp netripper /usr/share/metasploit-framework/modules/post/windows/gather/netripper/netripper
-5. cd ../Win32 
-6. cp DLL.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.dll
-
-Note: Support for x64 on the Metasploit module will be added soon.
+2. cp Metasploit/netripper.rb /usr/share/metasploit-framework/modules/post/windows/gather/netripper/netripper.rb
+3. cp x86/DLL.x86.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.x86.dll
+4. cp x64/DLL.x64.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.x64.dll
 
 # PowerShell module
 
 @HarmJ0y Added Invoke-NetRipper.ps1 PowerShell implementation of NetRipper.exe
+Please note that the PowerShell module is not up to date.
 
 # Plugins
 
 1. PlainText - Allows to capture only plain-text data
 2. DataLimit - Save only first bytes of requests and responses
 3. Stringinder - Find specific string in network traffic
-
-# Changelog
-
-Version 1.1.12:
-- Support for WinSCP 5.1.3
-
-Version 1.1.11:
-- Support for Chrome 65 (32 bits)
-
-Version 1.1.10:
-- Support for Chrome 65 (64 bits)
-
-Version 1.1.9:
-- Support for Putty 0.7.0 (64 bits)
-
-Version 1.1.8:
-- Support for Putty 0.7.0 (32 bits)
-
-Version 1.1.7:
-- Added --noreflective for classic injection
-
-Version 1.1.6:
-- Support for Chrome 64 (32 bits)
-
-Version 1.1.5:
-- Support for Chrome 64 (64 bits)
-
-Version 1.1.4:
-- Support for Chrome 62
-
-Version 1.1.3:
-- Three issues fixed by ip-gpu
-
-Version 1.1.2:
-- Added Chrome x64 support
-
-Version 1.1.1:
-- Changed DLL configuration process
-
-Version 1.1:
-- Initial support for x64 (using minhook library)
-
-Version 1.0.2:
-- Added support for SecureCRT 7.3
-- Added basic support for "__thiscall"
-
-Version 1.0.1:
-- Updated project to Visual Studio 2015
-- Added support for "dynamic" function signatures
-- Updated support for Chrome (tested with Chrome 49)
-- Thread-safe Win32 API hooking
-
-# To do
-
-- Support multiple applications
-- Monitor loading of DLLs and new processes
 
 Any suggestion is appreciated!
 

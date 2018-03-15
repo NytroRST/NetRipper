@@ -43,7 +43,8 @@ void InstallPlugins()
 
 	plLimit->SetConfig(DynConfig::GetDataLimit());
 
-	PluginSystem::InstallPlugin(plLimit);
+	if (DynConfig::GetPlainText().compare("0") == 0)
+		PluginSystem::InstallPlugin(plLimit);
 
 	// String finder plugin
 
@@ -52,9 +53,13 @@ void InstallPlugins()
 	plFinder->ReadCallback  = &Plugin_StringFinder;
 	plFinder->WriteCallback = &Plugin_StringFinder;
 
-	plFinder->SetConfig(DynConfig::GetStringFinder());
+	if(DynConfig::GetStringFinder().compare("DEFAULT") == 0)
+		plFinder->SetConfig("user, login, pass, config"); 
+	else
+		plFinder->SetConfig(DynConfig::GetStringFinder());
 
-	PluginSystem::InstallPlugin(plFinder);
+	if (DynConfig::GetStringFinder().length() > 0)
+		PluginSystem::InstallPlugin(plFinder);
 }
 
 // Our main function

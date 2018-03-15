@@ -5,15 +5,15 @@
 // Class data
 
 string DynConfig::s_sDataPath     = "TEMP";
-string DynConfig::s_sPlainText    = "true";
-string DynConfig::s_sDataLimit    = "4096";
-string DynConfig::s_sStringFinder = "user,login,pass,database,config";
+string DynConfig::s_sPlainText    = "false";
+string DynConfig::s_sDataLimit    = "65535";
+string DynConfig::s_sStringFinder = "user,login,pass,config";
 
 // Default settings
 
 string DynConfig::s_sConfigurationString = 
-	"<NetRipper><plaintext>true</plaintext><datalimit>4096</datalimit><stringfinder>user,login,pass,datab"
-	"ase,config</stringfinder><data_path>TEMP</data_path></NetRipper>------------------------------------"
+	"<NetRipper><plaintext>false</plaintext><datalimit>65535</datalimit><stringfinder>DEFAULT</stringfind"
+	"er><data_path>TEMP</data_path></NetRipper>----------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
