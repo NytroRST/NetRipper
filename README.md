@@ -66,7 +66,7 @@ Module options (post/windows/gather/netripper/netripper):
 
 ```
 
-Set PROCESSNAMES and run.
+Set PROCESSNAMES or PROCESSIDS and run.
 
 # Metasploit installation (Kali)
 
@@ -78,16 +78,21 @@ Set PROCESSNAMES and run.
 # PowerShell module
 
 @HarmJ0y Added Invoke-NetRipper.ps1 PowerShell implementation of NetRipper.exe
+
 Please note that the PowerShell module is not up to date.
 
 # Plugins
 
 1. PlainText - Allows to capture only plain-text data
 2. DataLimit - Save only first bytes of requests and responses
-3. Stringinder - Find specific string in network traffic
+3. StringFinder - Find specific string in network traffic
 
-Any suggestion is appreciated!
+# More details
+
+You can find the changelog in the "Changelog.md" file and compilation instructions in the "Compilation.md" file.
+
+NetRipper uses Reflective DLL Injection (https://github.com/stephenfewer/ReflectiveDLLInjection) from Stephen Fewer and minhook library (https://github.com/TsudaKageyu/minhook) from Tsuda Kageyu.
 
 # Author
 
-Ionut Popescu
+Ionut Popescu (@NytroRST)
