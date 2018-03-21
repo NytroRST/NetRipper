@@ -151,6 +151,17 @@ void Inject()
 			MH_CreateHook((void *)DecryptMessage_Original, (void *)DecryptMessage_Callback, &((void *)DecryptMessage_Original));
 		}
 
+		// SSLeay_Write, SSLeay_Read
+
+		else if (Utils::ToLower(vDlls[i].szModule).compare("ssleay32.dll") == 0)
+		{
+			SSLeay_Write_Original = (SSLeay_Write_Typedef)GetProcAddress(LoadLibrary("ssleay32.dll"), "SSL_write");
+			SSLeay_Read_Original  = (SSLeay_Read_Typedef) GetProcAddress(LoadLibrary("ssleay32.dll"), "SSL_read");
+			
+			MH_CreateHook((void *)SSLeay_Write_Original, (void *)SSLeay_Write_Callback, &((void *)SSLeay_Write_Original));
+			MH_CreateHook((void *)SSLeay_Read_Original,  (void *)SSLeay_Read_Callback,  &((void *)SSLeay_Read_Original));
+		}
+
 		// chrome.dll
 
 		else if(Utils::ToLower(vDlls[i].szModule).compare("chrome.dll") == 0)

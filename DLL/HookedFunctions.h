@@ -50,6 +50,18 @@ int SSL_Read_Callback32(void *ssl, void *buffer, int amount);
 
 // =============================================================================================//
 
+// SSLEay_Read, SSLEay_Write
+
+typedef int(*SSLeay_Write_Typedef)(void *, void *, int);
+typedef int(*SSLeay_Read_Typedef)(void *, void *, int);
+
+// Callbacks
+
+int SSLeay_Write_Callback(void *ssl, void *buffer, int amount);
+int SSLeay_Read_Callback(void *ssl, void *buffer, int amount);
+
+// =============================================================================================//
+
 // SecureCRT_Write
 
 typedef int(__stdcall *SecureCRT_Typedef)(unsigned char **data, DWORD);
@@ -163,6 +175,9 @@ extern SSL_Read_Typedef64 SSL_Read_Original64;
 
 extern SSL_Write_Typedef32 SSL_Write_Original32;
 extern SSL_Read_Typedef32 SSL_Read_Original32;
+
+extern SSLeay_Write_Typedef SSLeay_Write_Original;
+extern SSLeay_Read_Typedef SSLeay_Read_Original;
 
 extern PR_Send_Typedef PR_Send_Original;
 extern PR_Recv_Typedef PR_Recv_Original;

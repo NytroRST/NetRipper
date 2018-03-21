@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.14:
+- Support for SSLeay library
+
 Version 1.1.13:
 - Added Metasploit module
 - Configuration updates

@@ -14,6 +14,9 @@ SSL_Read_Typedef64 SSL_Read_Original64;
 SSL_Write_Typedef32 SSL_Write_Original32;
 SSL_Read_Typedef32 SSL_Read_Original32;
 
+SSLeay_Write_Typedef SSLeay_Write_Original;
+SSLeay_Read_Typedef SSLeay_Read_Original;
+
 PR_Send_Typedef PR_Send_Original;
 PR_Recv_Typedef PR_Recv_Original;
 
@@ -157,6 +160,47 @@ int SSL_Read_Callback32(void *fd, void *buffer, int amount)
 	if (bFlag == FALSE)
 	{
 		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
+	}
+
+	FunctionFlow::UnCheckFlag();
+
+	return ret;
+}
+
+// SSL_Write callback 32 bits
+
+int SSLeay_Write_Callback(void *fd, void *buffer, int amount)
+{
+	LONG res;
+
+	// If allowed
+
+	if (FunctionFlow::CheckFlag() == FALSE)
+	{
+		PluginSystem::ProcessAndSaveWrite("SSLeay_Write.txt", (unsigned char *)buffer, amount);
+	}
+
+	// Call original function
+
+	res = SSLeay_Write_Original(fd, buffer, amount);
+
+	FunctionFlow::UnCheckFlag();
+
+	return res;
+}
+
+// SSL_Read callback 32 bits
+
+int SSLeay_Read_Callback(void *fd, void *buffer, int amount)
+{
+	BOOL bFlag = FunctionFlow::CheckFlag();
+	int ret = SSLeay_Read_Original(fd, buffer, amount);
+
+	// Do things
+
+	if (bFlag == FALSE)
+	{
+		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSLeay_Read.txt", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
