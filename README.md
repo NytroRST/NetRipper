@@ -75,6 +75,13 @@ Set PROCESSNAMES or PROCESSIDS and run.
 3. cp x86/DLL.x86.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.x86.dll
 4. cp x64/DLL.x64.dll /usr/share/metasploit-framework/modules/post/windows/gather/netripper/DLL.x64.dll
 
+# Metasploit installation (Backbox)
+
+1. mkdir /opt/metasploit-framework/modules/post/windows/gather/netripper
+2. cp Metasploit/netripper.rb /opt/metasploit-framework/modules/post/windows/gather/netripper/netripper.rb
+3. cp x86/DLL.x86.dll /opt/metasploit-framework/modules/post/windows/gather/netripper/DLL.x86.dll
+4. cp x64/DLL.x64.dll /opt/metasploit-framework/modules/post/windows/gather/netripper/DLL.x64.dll
+
 # PowerShell module
 
 @HarmJ0y Added Invoke-NetRipper.ps1 PowerShell implementation of NetRipper.exe
