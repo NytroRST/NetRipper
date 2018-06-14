@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.15:
+- Added support for PCAP files
+
 Version 1.1.14:
 - Support for SSLeay library
 

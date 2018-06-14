@@ -85,7 +85,7 @@ void PluginSystem::ProcessAndSaveRead(string p_sFilename, unsigned char *p_pcDat
 	
 	PLUGIN_DATA ret = PluginSystem::ProcessReadData(p_pcData, p_nSize);
 
-	if(ret.size > 0) Utils::WriteToTempFile(p_sFilename, ret.data, ret.size);
+	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, false);
 	if(ret.data != p_pcData) delete[] ret.data;
 }
 
@@ -97,6 +97,6 @@ void PluginSystem::ProcessAndSaveWrite(string p_sFilename, unsigned char *p_pcDa
 	
 	PLUGIN_DATA ret = PluginSystem::ProcessWriteData(p_pcData, p_nSize);
 
-	if(ret.size > 0) Utils::WriteToTempFile(p_sFilename, ret.data, ret.size);
+	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, true);
 	if(ret.data != p_pcData) delete[] ret.data;
 }

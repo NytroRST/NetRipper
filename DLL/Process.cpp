@@ -21,29 +21,6 @@ ADDRESS_VALUE Process::SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void
 	return 0;
 }
 
-// Search in memory and return N'th occurence 
-
-ADDRESS_VALUE Process::SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN)
-{
-	unsigned char *pByte = (unsigned char *)p_pvStartAddress;
-	unsigned int n = 0;
-
-	for(size_t i = 0; i < p_dwSize - p_dwBufferSize; i++)
-	{
-		// Find each occurence and return the N'th one
-
-		if(memcmp(pByte + i, p_pvBuffer, p_dwBufferSize) == 0)
-		{
-			n++;
-			if(n == p_nN) return (ADDRESS_VALUE)(pByte + i);
-		}
-	}
-
-	DebugLog::Log("[ERROR] SearchMemory did not find the pattern!");
-
-	return 0;
-}
-
 // Seach a signature
 
 ADDRESS_VALUE Process::SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize)

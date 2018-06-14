@@ -56,6 +56,9 @@
     <ClInclude Include="Plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PCAP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -95,6 +98,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Plugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PCAP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

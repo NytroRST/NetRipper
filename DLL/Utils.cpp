@@ -78,12 +78,18 @@ void Utils::WriteToTempFile(string p_sFilename, const unsigned char *p_pcBuffer,
 	string sPath = "";
 	size_t nWritten = 0;
 
+	if (p_pcBuffer == NULL || p_nLength == 0)
+	{
+		DebugLog::Log("WARNING: Cannot write NULL data");
+		return;
+	}
+
 	sPath = DynConfig::GetDataPath();
 	sPath = sPath + Utils::GetFilename(p_sFilename);
 
 	// Open file
 	
-	pFile = fopen(sPath.c_str(), "a");
+	pFile = fopen(sPath.c_str(), "ab");
 
 	if(pFile == NULL) 
 	{
@@ -187,4 +193,12 @@ vector<string> Utils::SplitString(string p_sString, string p_sDelimiter)
 
     sVector.push_back(p_sString.substr(lastPos, p_sString.size() - lastPos));
     return sVector;
+}
+
+// Check if a process is 32 bit or 64 bit
+
+bool Utils::Is32BitProcess()
+{
+	if (sizeof(void*) == 4) return true;
+	else return false;
 }

@@ -7,6 +7,7 @@
 #include "DynConfig.h"
 #include "Utils.h"
 #include "Plugin.h"
+#include "PCAP.h"
 
 using namespace std;
 

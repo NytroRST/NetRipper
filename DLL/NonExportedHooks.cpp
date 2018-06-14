@@ -39,45 +39,54 @@ void HookChrome()
 		return;
 	}
 
-	// Search memory
-
-	ADDRESS_VALUE pWrite64 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature64, sizeof(Write_Signature64));
-	ADDRESS_VALUE pRead64  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature64, sizeof(Read_Signature64));
-
-	ADDRESS_VALUE pWrite32 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature32, sizeof(Write_Signature32));
-	ADDRESS_VALUE pRead32  = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature32, sizeof(Read_Signature32));
-
-	// We have the x64 versions
-
-	if(pWrite64 && pRead64)
-	{
-		// Add hooks
-
-		SSL_Write_Original64 = (SSL_Write_Typedef64)pWrite64;
-		SSL_Read_Original64  = (SSL_Read_Typedef64)pRead64;
-
-		MH_CreateHook((void *)pWrite64, (void *)SSL_Write_Callback64, &((void *)SSL_Write_Original64));
-		MH_CreateHook((void *)pRead64,  (void *)SSL_Read_Callback64,  &((void *)SSL_Read_Original64));
-
-		return;
-	}
-
 	// We have the x86 versions
 
-	if (pWrite32 && pRead32)
+	if (Utils::Is32BitProcess())
 	{
+		// Search memory
+		
+		ADDRESS_VALUE pWrite32 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature32, sizeof(Write_Signature32));
+		ADDRESS_VALUE pRead32 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature32, sizeof(Read_Signature32));
+
+		if (pRead32 == 0 || pWrite32 == 0)
+		{
+			DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
+			return;
+		}
+		
 		// Add hooks
 
-		SSL_Write_Original32 = (SSL_Write_Typedef32)pWrite32;
-		SSL_Read_Original32  = (SSL_Read_Typedef32)pRead32;
+		SSL_Write_Original = (SSL_Write_Typedef)pWrite32;
+		SSL_Read_Original  = (SSL_Read_Typedef)pRead32;
 
-		MH_CreateHook((void *)pWrite32, (void *)SSL_Write_Callback32, &((void *)SSL_Write_Original32));
-		MH_CreateHook((void *)pRead32,  (void *)SSL_Read_Callback32,  &((void *)SSL_Read_Original32));
+		MH_CreateHook((void *)pWrite32, (void *)SSL_Write_Callback, &((void *)SSL_Write_Original));
+		MH_CreateHook((void *)pRead32,  (void *)SSL_Read_Callback,  &((void *)SSL_Read_Original));
 
 		return;
 	}
+	else 
+	{
+		// Search memory
 
-	DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
+		ADDRESS_VALUE pWrite64 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Write_Signature64, sizeof(Write_Signature64));
+		ADDRESS_VALUE pRead64 = Process::SearchSignature((void *)text.dwStartAddress, text.dwSize, (void *)Read_Signature64, sizeof(Read_Signature64));
+
+		if (pRead64 == 0 || pWrite64 == 0)
+		{
+			DebugLog::Log("[ERROR] Cannot get Chrome SSL functions!");
+			return;
+		}
+		
+		// Add hooks
+
+		SSL_Write_Original = (SSL_Write_Typedef)pWrite64;
+		SSL_Read_Original = (SSL_Read_Typedef)pRead64;
+
+		MH_CreateHook((void *)pWrite64, (void *)SSL_Write_Callback, &((void *)SSL_Write_Original));
+		MH_CreateHook((void *)pRead64, (void *)SSL_Read_Callback, &((void *)SSL_Read_Original));
+
+		return;
+	}
 }
 
 // Hook Putty - (c) PuttyRider - Adrian Furtuna

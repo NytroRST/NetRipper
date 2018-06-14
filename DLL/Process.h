@@ -45,7 +45,6 @@ public:
 	static vector<MODULEENTRY32> GetProcessModules(DWORD p_dwID);
 	static SECTION_INFO GetModuleSection(string p_sModule, string p_sSection);
 	static ADDRESS_VALUE SearchMemory(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
-	static ADDRESS_VALUE SearchMemoryByN(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize, unsigned int p_nN);
 	static ADDRESS_VALUE SearchSignature(void* p_pvStartAddress, DWORD p_dwSize, void *p_pvBuffer, DWORD p_dwBufferSize);
 };
 

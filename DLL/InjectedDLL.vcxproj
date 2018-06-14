@@ -124,6 +124,7 @@
     <ClInclude Include="HookedFunctions.h" />
     <ClInclude Include="InjectedDLL.h" />
     <ClInclude Include="NonExportedHooks.h" />
+    <ClInclude Include="PCAP.h" />
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="PluginSystem.h" />
     <ClInclude Include="Process.h" />
@@ -148,6 +149,7 @@
     <ClCompile Include="HookedFunctions.cpp" />
     <ClCompile Include="InjectedDLL.cpp" />
     <ClCompile Include="NonExportedHooks.cpp" />
+    <ClCompile Include="PCAP.cpp" />
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="PluginSystem.cpp" />
     <ClCompile Include="Process.cpp" />

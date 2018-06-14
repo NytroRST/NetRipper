@@ -8,11 +8,8 @@ PR_Write_Typedef PR_Write_Original;
 PR_Read_Typedef PR_Read_Original;
 PR_GetDescType_Typedef PR_GetDescType_Original;
 
-SSL_Write_Typedef64 SSL_Write_Original64;
-SSL_Read_Typedef64 SSL_Read_Original64;
-
-SSL_Write_Typedef32 SSL_Write_Original32;
-SSL_Read_Typedef32 SSL_Read_Original32;
+SSL_Write_Typedef SSL_Write_Original;
+SSL_Read_Typedef SSL_Read_Original;
 
 SSLeay_Write_Typedef SSLeay_Write_Original;
 SSLeay_Read_Typedef SSLeay_Read_Original;
@@ -52,7 +49,7 @@ int PR_Write_Callback(void *fd, void *buffer, DWORD amount)
 
 		if( (PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && buffer != NULL) 
 		{
-				PluginSystem::ProcessAndSaveWrite("PR_Write.txt", (unsigned char *)buffer, amount);
+				PluginSystem::ProcessAndSaveWrite("PR_ReadWrite.pcap", (unsigned char *)buffer, amount);
 		}
 	}
 
@@ -77,7 +74,7 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 	if(bFlag == FALSE)
 	{
 		if((PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && ret > 0)
-			PluginSystem::ProcessAndSaveRead("PR_Read.txt", (unsigned char *)buffer, ret);
+			PluginSystem::ProcessAndSaveRead("PR_ReadWrite.pcap", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -87,7 +84,7 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 
 // SSL_Write callback 64 bits
 
-int SSL_Write_Callback64(void *fd, void *buffer, int amount)
+int SSL_Write_Callback(void *fd, void *buffer, int amount)
 {
 	LONG res;
 
@@ -95,12 +92,12 @@ int SSL_Write_Callback64(void *fd, void *buffer, int amount)
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		PluginSystem::ProcessAndSaveWrite("SSL_Write.txt", (unsigned char *)buffer, amount);
+		PluginSystem::ProcessAndSaveWrite("SSL_ReadWrite.pcap", (unsigned char *)buffer, amount);
 	}
 
 	// Call original function
 	
-	res = SSL_Write_Original64(fd, buffer, amount);
+	res = SSL_Write_Original(fd, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
 
@@ -109,16 +106,16 @@ int SSL_Write_Callback64(void *fd, void *buffer, int amount)
 
 // SSL_Read callback 64 bits
 
-int SSL_Read_Callback64(void *fd, void *buffer, int amount)
+int SSL_Read_Callback(void *fd, void *buffer, int amount)
 {
 	BOOL bFlag = FunctionFlow::CheckFlag();
-	int ret = SSL_Read_Original64(fd, buffer, amount);
+	int ret = SSL_Read_Original(fd, buffer, amount);
 
 	// Do things
 
 	if (bFlag == FALSE)
 	{
-		if(ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
+		if(ret > 0) PluginSystem::ProcessAndSaveRead("SSL_ReadWrite.pcap", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -126,48 +123,7 @@ int SSL_Read_Callback64(void *fd, void *buffer, int amount)
 	return ret;
 }
 
-// SSL_Write callback 32 bits
-
-int SSL_Write_Callback32(void *fd, void *buffer, int amount)
-{
-	LONG res;
-
-	// If allowed
-
-	if (FunctionFlow::CheckFlag() == FALSE)
-	{
-		PluginSystem::ProcessAndSaveWrite("SSL_Write.txt", (unsigned char *)buffer, amount);
-	}
-
-	// Call original function
-
-	res = SSL_Write_Original32(fd, buffer, amount);
-
-	FunctionFlow::UnCheckFlag();
-
-	return res;
-}
-
-// SSL_Read callback 32 bits
-
-int SSL_Read_Callback32(void *fd, void *buffer, int amount)
-{
-	BOOL bFlag = FunctionFlow::CheckFlag();
-	int ret = SSL_Read_Original32(fd, buffer, amount);
-
-	// Do things
-
-	if (bFlag == FALSE)
-	{
-		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSL_Read.txt", (unsigned char *)buffer, ret);
-	}
-
-	FunctionFlow::UnCheckFlag();
-
-	return ret;
-}
-
-// SSL_Write callback 32 bits
+// SSLeay_Write callback
 
 int SSLeay_Write_Callback(void *fd, void *buffer, int amount)
 {
@@ -177,7 +133,7 @@ int SSLeay_Write_Callback(void *fd, void *buffer, int amount)
 
 	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		PluginSystem::ProcessAndSaveWrite("SSLeay_Write.txt", (unsigned char *)buffer, amount);
+		PluginSystem::ProcessAndSaveWrite("SSLeay_ReadWrite.pcap", (unsigned char *)buffer, amount);
 	}
 
 	// Call original function
@@ -189,7 +145,7 @@ int SSLeay_Write_Callback(void *fd, void *buffer, int amount)
 	return res;
 }
 
-// SSL_Read callback 32 bits
+// SSLeay_Read callback 
 
 int SSLeay_Read_Callback(void *fd, void *buffer, int amount)
 {
@@ -200,7 +156,7 @@ int SSLeay_Read_Callback(void *fd, void *buffer, int amount)
 
 	if (bFlag == FALSE)
 	{
-		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSLeay_Read.txt", (unsigned char *)buffer, ret);
+		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSLeay_ReadWrite.pcap", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -220,7 +176,7 @@ int PR_Send_Callback(void *fd, const void *buf, int amount, int flags, DWORD tim
 	{
 		if(buf != NULL && amount > 0)
 		{
-			PluginSystem::ProcessAndSaveWrite("PR_Send.txt", (unsigned char *)buf, amount);
+			PluginSystem::ProcessAndSaveWrite("PR_RecvSend.pcap", (unsigned char *)buf, amount);
 		}
 	}
 
@@ -245,7 +201,7 @@ int PR_Recv_Callback(void *fd, void *buf, int amount, int flags, DWORD timeout)
 	if(bFlag == FALSE)
 	{
 		if(ret > 0)
-			PluginSystem::ProcessAndSaveRead("PR_Recv.txt", (unsigned char *)buf, ret);
+			PluginSystem::ProcessAndSaveRead("PR_RecvSend.pcap", (unsigned char *)buf, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -265,7 +221,7 @@ LONG __stdcall SslEncryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 	{
 		if(pbInput != NULL && cbInput > 0) 
 		{
-			PluginSystem::ProcessAndSaveWrite("SslEncryptPacket.txt", (unsigned char *)pbInput, cbInput);
+			PluginSystem::ProcessAndSaveWrite("SslEncryptDecryptPacket.pcap", (unsigned char *)pbInput, cbInput);
 		}
 	}
 
@@ -291,7 +247,7 @@ LONG __stdcall SslDecryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 	if(bFlag == FALSE)
 	{
 		if(pcbResult > 0) 
-			PluginSystem::ProcessAndSaveRead("SslDecryptPacket.txt", (unsigned char *)pbOutput, *pcbResult);
+			PluginSystem::ProcessAndSaveRead("SslEncryptDecryptPacket.pcap", (unsigned char *)pbOutput, *pcbResult);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -311,7 +267,7 @@ int __stdcall send_Callback(int s, char *buf, int len, int flags)
 	{
 		if(buf != NULL && len > 0)
 		{
-			PluginSystem::ProcessAndSaveWrite("send.txt", (unsigned char *)buf, len);
+			PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)buf, len);
 		}
 	}
 
@@ -336,7 +292,7 @@ int __stdcall recv_Callback(int s, char *buf, int len, int flags)
 	if(bFlag == FALSE)
 	{
 		if(ret > 0)
-			PluginSystem::ProcessAndSaveRead("recv.txt", (unsigned char *)buf, ret);
+			PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)buf, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -359,7 +315,7 @@ int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 		{
 			for(DWORD i = 0; i < dwBufferCount; i++)
 			{
-				PluginSystem::ProcessAndSaveWrite("WSASend.txt", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
+				PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
 			}
 		}
 	}
@@ -389,7 +345,7 @@ int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 		{
 			for(DWORD i = 0; i < dwBufferCount; i++)
 			{
-				PluginSystem::ProcessAndSaveRead("WSARecv.txt", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
+				PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
 			}
 		}
 	}
@@ -416,7 +372,7 @@ SECURITY_STATUS __stdcall EncryptMessage_Callback(PCtxtHandle phContext, ULONG f
 				SecBuffer buf = pMessage->pBuffers[i];
 
 				if(buf.BufferType == SECBUFFER_DATA) 
-					PluginSystem::ProcessAndSaveWrite("EncryptMessage.txt", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
+					PluginSystem::ProcessAndSaveWrite("EncryptDecryptMessage.pcap", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
 			}
 		}
 	}
@@ -450,7 +406,7 @@ SECURITY_STATUS __stdcall DecryptMessage_Callback(PCtxtHandle phContext, PSecBuf
 					SecBuffer buf = pMessage->pBuffers[i];
 
 					if(buf.BufferType == SECBUFFER_DATA) 
-						PluginSystem::ProcessAndSaveRead("DecryptMessage.txt", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
+						PluginSystem::ProcessAndSaveRead("EncryptDecryptMessage.pcap", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
 				}
 			}
 		}
@@ -469,7 +425,7 @@ void PuttySend_Callback(void *handle, char *buf, int len, int interactive)
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttySend.txt", (unsigned char *)buf, 1);
+		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttyRecvSend.pcap", (unsigned char *)buf, 1);
 	}
 
 	// Call original function
@@ -490,7 +446,7 @@ int PuttyRecv_Callback(void *term, int is_stderr, const char *data, int len)
 
 	if(bFlag == FALSE)
 	{
-		if(data != NULL) PluginSystem::ProcessAndSaveRead("PuttyRecv.txt", (unsigned char *)data, len);
+		if(data != NULL) PluginSystem::ProcessAndSaveRead("PuttyRecvSend.pcap", (unsigned char *)data, len);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -514,7 +470,7 @@ void __fastcall SSH_Pktsend_Callback(int datalen, unsigned char *data)
 
 	if(FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveWrite("SSH_Send.txt", data, datalen);
+		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveWrite("SSH_RecvSend.pcap", data, datalen);
 	}
 
 	// Restore EAX register
@@ -556,7 +512,7 @@ int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 
 	if(bFlag == FALSE)
 	{
-		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveRead("SSH_Receive.txt", data, datalen);
+		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveRead("SSH_RecvSend.pcap", data, datalen);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -590,7 +546,7 @@ int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 
 	if (bFlag == FALSE)
 	{
-		if (*data != NULL) PluginSystem::ProcessAndSaveRead("SecureCRT.txt", (*data), size);
+		if (*data != NULL) PluginSystem::ProcessAndSaveRead("SecureCRT.pcap", (*data), size);
 	}
 
 	FunctionFlow::UnCheckFlag();

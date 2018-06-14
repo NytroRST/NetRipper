@@ -30,6 +30,7 @@ public:
 	static void WriteToTempFile(string p_sFilename, const unsigned char *p_pcBuffer, size_t p_nLength);
 	static string GetStringBetween(string p_sString, string p_sStart, string p_sStop);
 	static vector<string> SplitString(string p_sString, string p_sDelimiter);
+	static bool Is32BitProcess();
 };
 
 #endif
