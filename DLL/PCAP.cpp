@@ -119,26 +119,31 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 	ipHeader.protocol = 6;
 	ipHeader.checksum = 0;
 
-	// IP addresses 
+	// IP addresses and TCP ports
 
-	if (p_bDataSent)
+	if (!p_bDataSent)
 	{
-		ipHeader.src_addr = 0x31313131;
-		ipHeader.dst_addr = 0x32323232;
+		ipHeader.src_addr = 0x10101010;
+		ipHeader.dst_addr = 0x20202020;
+		tcpHeader.src_port = HTONS((uint16_t)p_nDstPort);
+		tcpHeader.dst_port = HTONS((uint16_t)p_nSrcPort);
 	}
 	else
 	{
-		ipHeader.src_addr = 0x32323232;
-		ipHeader.dst_addr = 0x31313131;
+		ipHeader.src_addr = 0x20202020;
+		ipHeader.dst_addr = 0x10101010;
+		tcpHeader.src_port = HTONS((uint16_t)p_nSrcPort);
+		tcpHeader.dst_port = HTONS((uint16_t)p_nDstPort);
 	}
 
 	// Set up TCP header
 
-	tcpHeader.src_port = HTONS((uint16_t)p_nSrcPort);
-	tcpHeader.dst_port = HTONS((uint16_t)p_nDstPort);
 	tcpHeader.seq = HTONL(seq);
 	tcpHeader.ack = HTONL(ack);
-	tcpHeader.len_and_flags = HTONS(0x5018);
+
+	if (p_bDataSent) tcpHeader.len_and_flags = HTONS(0x5018);
+	else tcpHeader.len_and_flags = HTONS(0x5010);
+
 	tcpHeader.window_size = 0xFFFF;
 	tcpHeader.checksum = 0;
 	tcpHeader.urgent_p = 0;

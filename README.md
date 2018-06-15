@@ -98,7 +98,9 @@ Please note that the PowerShell module is not up to date.
 
 You can find the changelog in the "Changelog.md" file and compilation instructions in the "Compilation.md" file.
 
-NetRipper uses Reflective DLL Injection (https://github.com/stephenfewer/ReflectiveDLLInjection) from Stephen Fewer and minhook library (https://github.com/TsudaKageyu/minhook) from Tsuda Kageyu.
+NetRipper uses 
+- Reflective DLL Injection (https://github.com/stephenfewer/ReflectiveDLLInjection) from Stephen Fewer 
+- minhook library (https://github.com/TsudaKageyu/minhook) from Tsuda Kageyu.
 
 # Author
 
