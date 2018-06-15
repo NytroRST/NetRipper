@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.16:
+- Get IP and port info for sockets
+
 Version 1.1.15:
 - Added support for PCAP files
 

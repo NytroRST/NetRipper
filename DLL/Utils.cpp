@@ -202,3 +202,30 @@ bool Utils::Is32BitProcess()
 	if (sizeof(void*) == 4) return true;
 	else return false;
 }
+
+// Get IP and port information
+
+IPInfo Utils::GetIPInfo(unsigned int p_nSocket)
+{
+	IPInfo data;
+	sockaddr_in sock_client, sock_server;
+	int len_client = sizeof(sock_client);
+	int len_server = sizeof(sock_server);
+
+	// Get socket data
+
+	memset(&sock_client, 0, sizeof(sock_client));
+	memset(&sock_server, 0, sizeof(sock_server));
+
+	getsockname((SOCKET)p_nSocket, (struct sockaddr *)&sock_client, &len_client);
+	getpeername((SOCKET)p_nSocket, (struct sockaddr *)&sock_server, &len_server);
+
+	// Save data
+
+	data.nSrcIP = (uint32_t)sock_client.sin_addr.S_un.S_addr;
+	data.nDstIP = (uint32_t)sock_server.sin_addr.S_un.S_addr;
+	data.nSrcPort = (uint16_t)ntohs(sock_client.sin_port);
+	data.nDstPort = (uint16_t)ntohs(sock_server.sin_port);
+
+	return data;
+}

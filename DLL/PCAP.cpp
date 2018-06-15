@@ -88,7 +88,7 @@ pcaprec_hdr_s PCAP::CreatePacketHeader(size_t nLength)
 // Create packet contents, including TCP/IP header (https://github.com/google/ssl_logger/blob/master/ssl_logger.py)
 
 unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, size_t p_nSize,
-	bool p_bDataSent, string p_sSrcIP, string p_sDstIP, size_t p_nSrcPort, size_t p_nDstPort)
+	bool p_bDataSent, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
 	ip_header_t  ipHeader;
 	tcp_header_t tcpHeader;
@@ -123,15 +123,15 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 
 	if (!p_bDataSent)
 	{
-		ipHeader.src_addr = 0x10101010;
-		ipHeader.dst_addr = 0x20202020;
+		ipHeader.src_addr = p_sDstIP;
+		ipHeader.dst_addr = p_sSrcIP;
 		tcpHeader.src_port = HTONS((uint16_t)p_nDstPort);
 		tcpHeader.dst_port = HTONS((uint16_t)p_nSrcPort);
 	}
 	else
 	{
-		ipHeader.src_addr = 0x20202020;
-		ipHeader.dst_addr = 0x10101010;
+		ipHeader.src_addr = p_sSrcIP;
+		ipHeader.dst_addr = p_sDstIP;
 		tcpHeader.src_port = HTONS((uint16_t)p_nSrcPort);
 		tcpHeader.dst_port = HTONS((uint16_t)p_nDstPort);
 	}
@@ -166,7 +166,7 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 // Write data to PCAP file
 
 void PCAP::WriteData(string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
-	string p_sSrcIP, string p_sDstIP, size_t p_nSrcPort, size_t p_nDstPort)
+	uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
 	pcaprec_hdr_s pheader = CreatePacketHeader(p_nSize);
 	PCAPFile *pcap = GetPCAP(p_sFilename);

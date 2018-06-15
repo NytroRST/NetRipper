@@ -267,7 +267,7 @@ int __stdcall send_Callback(int s, char *buf, int len, int flags)
 	{
 		if(buf != NULL && len > 0)
 		{
-			PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)buf, len);
+			PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)buf, len, s);
 		}
 	}
 
@@ -292,7 +292,7 @@ int __stdcall recv_Callback(int s, char *buf, int len, int flags)
 	if(bFlag == FALSE)
 	{
 		if(ret > 0)
-			PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)buf, ret);
+			PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)buf, ret, s);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -315,7 +315,7 @@ int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 		{
 			for(DWORD i = 0; i < dwBufferCount; i++)
 			{
-				PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
+				PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len, s);
 			}
 		}
 	}
@@ -345,7 +345,7 @@ int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 		{
 			for(DWORD i = 0; i < dwBufferCount; i++)
 			{
-				PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len);
+				PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len, s);
 			}
 		}
 	}

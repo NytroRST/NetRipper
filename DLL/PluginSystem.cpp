@@ -79,24 +79,26 @@ PLUGIN_DATA PluginSystem::ProcessWriteData(unsigned char *p_pcData, unsigned int
 
 // Will process read data and save it to a file
 
-void PluginSystem::ProcessAndSaveRead(string p_sFilename, unsigned char *p_pcData, unsigned int p_nSize)
+void PluginSystem::ProcessAndSaveRead(string p_sFilename, unsigned char *p_pcData, unsigned int p_nSize, unsigned int p_nSocket)
 {
 	if(p_pcData == NULL || p_nSize == 0) return;
 	
+	IPInfo ip = Utils::GetIPInfo(p_nSocket);
 	PLUGIN_DATA ret = PluginSystem::ProcessReadData(p_pcData, p_nSize);
 
-	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, false);
+	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, false, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
 	if(ret.data != p_pcData) delete[] ret.data;
 }
 
 // Will process write data and write it to a file
 
-void PluginSystem::ProcessAndSaveWrite(string p_sFilename, unsigned char *p_pcData, unsigned int p_nSize)
+void PluginSystem::ProcessAndSaveWrite(string p_sFilename, unsigned char *p_pcData, unsigned int p_nSize, unsigned int p_nSocket)
 {
 	if(p_pcData == NULL || p_nSize == 0) return;
 	
+	IPInfo ip = Utils::GetIPInfo(p_nSocket);
 	PLUGIN_DATA ret = PluginSystem::ProcessWriteData(p_pcData, p_nSize);
 
-	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, true);
+	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, true, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
 	if(ret.data != p_pcData) delete[] ret.data;
 }

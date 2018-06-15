@@ -106,14 +106,14 @@ class PCAP
 	static void WriteHeader(PCAPFile *p_pPCAP);
 	static pcaprec_hdr_s CreatePacketHeader(size_t nLength);
 	static unsigned char* CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
-		string p_sSrcIP, string p_sDstIP, size_t p_nSrcPort, size_t p_nDstPort);
+		uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
 
 public:
 
 	// Main function that does everything
 
 	static void WriteData(string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
-		string p_sSrcIP = "", string p_sDstIP = "", size_t p_nSrcPort = 1337, size_t p_nDstPort = 80);
+		uint32_t p_sSrcIP = 0x10101010, uint32_t p_sDstIP = 0x20202020, uint16_t p_nSrcPort = 1337, uint16_t p_nDstPort = 80);
 	static void SetPacketSize(unsigned int p_nPacketSize);
 };
 
