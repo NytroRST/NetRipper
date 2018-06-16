@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.17:
+- Support for Chrome 67 (32 and 64 bits)
+
 Version 1.1.16:
 - Get IP and port info for sockets
 
