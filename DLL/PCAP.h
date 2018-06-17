@@ -81,6 +81,7 @@ typedef struct {
 
 #define LINKTYPE_IPV4			228
 #define PACKET_HEADER_SIZE		40
+#define MAX_PACKET_SIZE			65535
 
 // Conversion: http://www.jbox.dk/sanos/source/include/net/inet.h.html
 
@@ -97,7 +98,6 @@ class PCAP
 	// Array containing required info about PCAP files
 
 	static vector<PCAPFile*> s_vPCAPFiles;
-	static unsigned int s_nPacketSize;
 
 	// Internal functions
 
@@ -107,6 +107,8 @@ class PCAP
 	static pcaprec_hdr_s CreatePacketHeader(size_t nLength);
 	static unsigned char* CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
 		uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
+	static void WritePacketData(PCAPFile *p_pPCAP, string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
+		uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
 
 public:
 
@@ -114,7 +116,6 @@ public:
 
 	static void WriteData(string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
 		uint32_t p_sSrcIP = 0x10101010, uint32_t p_sDstIP = 0x20202020, uint16_t p_nSrcPort = 1337, uint16_t p_nDstPort = 80);
-	static void SetPacketSize(unsigned int p_nPacketSize);
 };
 
 #endif 

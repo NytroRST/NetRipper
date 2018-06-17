@@ -3,14 +3,6 @@
 #include "PCAP.h"
 
 vector<PCAPFile*> PCAP::s_vPCAPFiles;
-unsigned int PCAP::s_nPacketSize = 65535;
-
-// Set maximum packet size
-
-void PCAP::SetPacketSize(unsigned int p_nPacketSize)
-{
-	s_nPacketSize = p_nPacketSize + PACKET_HEADER_SIZE;
-}
 
 // Create a PCAP struct
 
@@ -58,7 +50,7 @@ void PCAP::WriteHeader(PCAPFile *p_pPCAP)
 	header.version_minor = 4;
 	header.thiszone = 0;
 	header.sigfigs = 0;
-	header.snaplen = s_nPacketSize;
+	header.snaplen = MAX_PACKET_SIZE;
 	header.network = LINKTYPE_IPV4;
 
 	// Write the header
@@ -163,25 +155,44 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 	return pData;
 }
 
+// Write a packet's data
+
+void PCAP::WritePacketData(PCAPFile *p_pPCAP, string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
+	uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
+{
+	// Packet header 
+
+	pcaprec_hdr_s pheader = CreatePacketHeader(p_nSize);
+	Utils::WriteToTempFile(p_sFilename, (unsigned char *)&pheader, sizeof(pheader));
+
+	// Write packet data
+
+	unsigned char *pData = CreatePacket(p_pPCAP, p_pcData, p_nSize, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
+	Utils::WriteToTempFile(p_sFilename, pData, sizeof(ip_header_t) + sizeof(tcp_header_t) + (uint16_t)p_nSize);
+	delete[] pData;
+}
+
 // Write data to PCAP file
 
 void PCAP::WriteData(string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
 	uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
-	pcaprec_hdr_s pheader = CreatePacketHeader(p_nSize);
 	PCAPFile *pcap = GetPCAP(p_sFilename);
+	size_t size_counter = (size_t)(p_nSize / MAX_PACKET_SIZE);
+	size_t size_rest    = (size_t)(p_nSize % MAX_PACKET_SIZE);
+
 	EnterCriticalSection(&pcap->oCriticalSection);
 
-	// Write pcap header (if not written) and packet header
+	// Write pcap header (if not written)
 
 	if (pcap->bHeaderWritten == false) WriteHeader(pcap);
-	Utils::WriteToTempFile(p_sFilename, (unsigned char *)&pheader, sizeof(pheader));
 
-	// Write packet data
+	// Write by using maximum 65535 bytes in a packet
 
-	unsigned char *pData = CreatePacket(pcap, p_pcData, p_nSize, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
-	Utils::WriteToTempFile(p_sFilename, pData, sizeof(ip_header_t) + sizeof(tcp_header_t) + (uint16_t)p_nSize);
-	delete[] pData;
+	for(size_t i = 0; i < size_counter; i++)
+		WritePacketData(pcap, p_sFilename, (unsigned char *)(p_pcData + i * MAX_PACKET_SIZE), MAX_PACKET_SIZE, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
+	
+	if(size_rest) WritePacketData(pcap, p_sFilename, (unsigned char *)(p_pcData + size_counter * MAX_PACKET_SIZE), size_rest, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
 
 	LeaveCriticalSection(&pcap->oCriticalSection);
 }
