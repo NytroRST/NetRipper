@@ -83,10 +83,17 @@ void PluginSystem::ProcessAndSaveRead(string p_sFilename, unsigned char *p_pcDat
 {
 	if(p_pcData == NULL || p_nSize == 0) return;
 	
-	IPInfo ip = Utils::GetIPInfo(p_nSocket);
 	PLUGIN_DATA ret = PluginSystem::ProcessReadData(p_pcData, p_nSize);
 
-	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, false, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
+	if (ret.size > 0)
+	{
+		if (p_nSocket)
+		{
+			IPInfo ip = Utils::GetIPInfo(p_nSocket);
+			PCAP::WriteData(p_sFilename, ret.data, ret.size, false, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
+		}
+		else PCAP::WriteData(p_sFilename, ret.data, ret.size, false);
+	}
 	if(ret.data != p_pcData) delete[] ret.data;
 }
 
@@ -96,9 +103,16 @@ void PluginSystem::ProcessAndSaveWrite(string p_sFilename, unsigned char *p_pcDa
 {
 	if(p_pcData == NULL || p_nSize == 0) return;
 	
-	IPInfo ip = Utils::GetIPInfo(p_nSocket);
 	PLUGIN_DATA ret = PluginSystem::ProcessWriteData(p_pcData, p_nSize);
 
-	if(ret.size > 0) PCAP::WriteData(p_sFilename, ret.data, ret.size, true, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
+	if(ret.size > 0) 
+	{
+		if (p_nSocket)
+		{
+			IPInfo ip = Utils::GetIPInfo(p_nSocket);
+			PCAP::WriteData(p_sFilename, ret.data, ret.size, true, ip.nSrcIP, ip.nDstIP, ip.nSrcPort, ip.nDstPort);
+		}
+		else PCAP::WriteData(p_sFilename, ret.data, ret.size, true);
+	}
 	if(ret.data != p_pcData) delete[] ret.data;
 }

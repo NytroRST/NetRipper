@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.18:
+- Fixes for PCAP files
+
 Version 1.1.17:
 - Support for Chrome 67 (32 and 64 bits)
 
