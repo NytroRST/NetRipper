@@ -4,8 +4,8 @@
 
 #include <string>
 #include <vector>
-#include <Windows.h>
-#include <TlHelp32.h> 
+#include <windows.h>
+#include <tlhelp32.h> 
 #include "Utils.h"
 #include "DebugLog.h"
 

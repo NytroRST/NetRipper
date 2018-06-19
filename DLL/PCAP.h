@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <ctime>
 #include <vector>
-#include <Windows.h>
+#include <windows.h>
 #include "Utils.h"
 #include "DebugLog.h"
 

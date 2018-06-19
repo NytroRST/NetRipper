@@ -43,13 +43,13 @@ int PR_Write_Callback(void *fd, void *buffer, DWORD amount)
 {
 	LONG res;
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
 		// Check if this is traffic
 
-		if( (PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && buffer != NULL) 
+		if ((PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && buffer != NULL)
 		{
-				PluginSystem::ProcessAndSaveWrite("PR_ReadWrite.pcap", (unsigned char *)buffer, amount);
+			PluginSystem::ProcessAndSaveWrite("PR_ReadWrite.pcap", (unsigned char *)buffer, amount);
 		}
 	}
 
@@ -71,9 +71,9 @@ int PR_Read_Callback(void *fd, void *buffer, DWORD amount)
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if((PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && ret > 0)
+		if ((PR_GetDescType_Original(fd) == 2 || PR_GetDescType_Original(fd) == 4) && ret > 0)
 			PluginSystem::ProcessAndSaveRead("PR_ReadWrite.pcap", (unsigned char *)buffer, ret);
 	}
 
@@ -90,13 +90,13 @@ int SSL_Write_Callback(void *fd, void *buffer, int amount)
 
 	// If allowed
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
 		PluginSystem::ProcessAndSaveWrite("SSL_ReadWrite.pcap", (unsigned char *)buffer, amount);
 	}
 
 	// Call original function
-	
+
 	res = SSL_Write_Original(fd, buffer, amount);
 
 	FunctionFlow::UnCheckFlag();
@@ -115,7 +115,7 @@ int SSL_Read_Callback(void *fd, void *buffer, int amount)
 
 	if (bFlag == FALSE)
 	{
-		if(ret > 0) PluginSystem::ProcessAndSaveRead("SSL_ReadWrite.pcap", (unsigned char *)buffer, ret);
+		if (ret > 0) PluginSystem::ProcessAndSaveRead("SSL_ReadWrite.pcap", (unsigned char *)buffer, ret);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -172,9 +172,9 @@ int PR_Send_Callback(void *fd, const void *buf, int amount, int flags, DWORD tim
 
 	// Do things
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL && amount > 0)
+		if (buf != NULL && amount > 0)
 		{
 			PluginSystem::ProcessAndSaveWrite("PR_RecvSend.pcap", (unsigned char *)buf, amount);
 		}
@@ -198,9 +198,9 @@ int PR_Recv_Callback(void *fd, void *buf, int amount, int flags, DWORD timeout)
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(ret > 0)
+		if (ret > 0)
 			PluginSystem::ProcessAndSaveRead("PR_RecvSend.pcap", (unsigned char *)buf, ret);
 	}
 
@@ -217,9 +217,9 @@ LONG __stdcall SslEncryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 
 	// Do things
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(pbInput != NULL && cbInput > 0) 
+		if (pbInput != NULL && cbInput > 0)
 		{
 			PluginSystem::ProcessAndSaveWrite("SslEncryptDecryptPacket.pcap", (unsigned char *)pbInput, cbInput);
 		}
@@ -244,9 +244,9 @@ LONG __stdcall SslDecryptPacket_Callback(ULONG_PTR hSslProvider, ULONG_PTR hKey,
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(pcbResult > 0) 
+		if (pcbResult > 0)
 			PluginSystem::ProcessAndSaveRead("SslEncryptDecryptPacket.pcap", (unsigned char *)pbOutput, *pcbResult);
 	}
 
@@ -263,9 +263,9 @@ int __stdcall send_Callback(int s, char *buf, int len, int flags)
 
 	// Do things
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL && len > 0)
+		if (buf != NULL && len > 0)
 		{
 			PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)buf, len, s);
 		}
@@ -289,9 +289,9 @@ int __stdcall recv_Callback(int s, char *buf, int len, int flags)
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(ret > 0)
+		if (ret > 0)
 			PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)buf, ret, s);
 	}
 
@@ -302,18 +302,18 @@ int __stdcall recv_Callback(int s, char *buf, int len, int flags)
 
 // WSASend callback
 
-int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, 
+int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent,
 	DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine)
 {
 	int res;
 
 	// Do things
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(lpBuffers != NULL && dwBufferCount > 0)
+		if (lpBuffers != NULL && dwBufferCount > 0)
 		{
-			for(DWORD i = 0; i < dwBufferCount; i++)
+			for (DWORD i = 0; i < dwBufferCount; i++)
 			{
 				PluginSystem::ProcessAndSaveWrite("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len, s);
 			}
@@ -331,7 +331,7 @@ int __stdcall WSASend_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 
 // WSARecv callback
 
-int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesRecvd, 
+int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesRecvd,
 	LPDWORD lpFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine)
 {
 	BOOL bFlag = FunctionFlow::CheckFlag();
@@ -339,11 +339,11 @@ int __stdcall WSARecv_Callback(int s, LPWSABUF lpBuffers, DWORD dwBufferCount, L
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(ret == 0)
+		if (ret == 0)
 		{
-			for(DWORD i = 0; i < dwBufferCount; i++)
+			for (DWORD i = 0; i < dwBufferCount; i++)
 			{
 				PluginSystem::ProcessAndSaveRead("recvsend.pcap", (unsigned char *)lpBuffers[i].buf, lpBuffers[i].len, s);
 			}
@@ -363,15 +363,15 @@ SECURITY_STATUS __stdcall EncryptMessage_Callback(PCtxtHandle phContext, ULONG f
 
 	// Do things
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(pMessage->pBuffers != NULL && pMessage->cBuffers > 0)
+		if (pMessage->pBuffers != NULL && pMessage->cBuffers > 0)
 		{
-			for(DWORD i = 0; i < pMessage->cBuffers; i++)
+			for (DWORD i = 0; i < pMessage->cBuffers; i++)
 			{
 				SecBuffer buf = pMessage->pBuffers[i];
 
-				if(buf.BufferType == SECBUFFER_DATA) 
+				if (buf.BufferType == SECBUFFER_DATA)
 					PluginSystem::ProcessAndSaveWrite("EncryptDecryptMessage.pcap", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
 			}
 		}
@@ -395,17 +395,17 @@ SECURITY_STATUS __stdcall DecryptMessage_Callback(PCtxtHandle phContext, PSecBuf
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(ret == SEC_E_OK)
+		if (ret == SEC_E_OK)
 		{
-			if(pMessage->pBuffers != NULL && pMessage->cBuffers > 0)
+			if (pMessage->pBuffers != NULL && pMessage->cBuffers > 0)
 			{
-				for(DWORD i = 0; i < pMessage->cBuffers; i++)
+				for (DWORD i = 0; i < pMessage->cBuffers; i++)
 				{
 					SecBuffer buf = pMessage->pBuffers[i];
 
-					if(buf.BufferType == SECBUFFER_DATA) 
+					if (buf.BufferType == SECBUFFER_DATA)
 						PluginSystem::ProcessAndSaveRead("EncryptDecryptMessage.pcap", (unsigned char *)buf.pvBuffer, buf.cbBuffer);
 				}
 			}
@@ -423,13 +423,13 @@ void PuttySend_Callback(void *handle, char *buf, int len, int interactive)
 {
 	// If allowed
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttyRecvSend.pcap", (unsigned char *)buf, 1);
+		if (buf != NULL) PluginSystem::ProcessAndSaveWrite("PuttyRecvSend.pcap", (unsigned char *)buf, 1);
 	}
 
 	// Call original function
-	
+
 	PuttySend_Original(handle, buf, len, interactive);
 
 	FunctionFlow::UnCheckFlag();
@@ -444,9 +444,9 @@ int PuttyRecv_Callback(void *term, int is_stderr, const char *data, int len)
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(data != NULL) PluginSystem::ProcessAndSaveRead("PuttyRecvSend.pcap", (unsigned char *)data, len);
+		if (data != NULL) PluginSystem::ProcessAndSaveRead("PuttyRecvSend.pcap", (unsigned char *)data, len);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -463,24 +463,34 @@ void __fastcall SSH_Pktsend_Callback(int datalen, unsigned char *data)
 	// Backup EAX register
 
 #if defined _M_IX86
+#ifdef _MSC_VER
 	__asm { mov pThis, EAX }
+#else 
+	register unsigned long eax asm("eax");
+	pThis = eax;
+#endif
 #endif 
 
 	// If allowed
 
-	if(FunctionFlow::CheckFlag() == FALSE)
+	if (FunctionFlow::CheckFlag() == FALSE)
 	{
-		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveWrite("SSH_RecvSend.pcap", data, datalen);
+		if (data != NULL && datalen > 0) PluginSystem::ProcessAndSaveWrite("SSH_RecvSend.pcap", data, datalen);
 	}
 
 	// Restore EAX register
 
 #if defined _M_IX86
+#ifdef _MSC_VER
 	__asm { mov EAX, pThis }
+#else 
+	eax = pThis;
+
+#endif
 #endif
 
 	// Call original function
-	
+
 	SSH_Pktsend_Original(datalen, data);
 
 	FunctionFlow::UnCheckFlag();
@@ -495,7 +505,12 @@ int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 	// Backup EAX register
 
 #if defined _M_IX86
+#ifdef _MSC_VER
 	__asm { mov pThis, EAX }
+#else 
+	register unsigned long eax asm("eax");
+	pThis = eax;
+#endif 
 #endif
 
 	BOOL bFlag = FunctionFlow::CheckFlag();
@@ -503,16 +518,20 @@ int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 	// Restore EAX register
 
 #if defined _M_IX86
+#ifdef _MSC_VER
 	__asm { mov EAX, pThis }
+#else 
+	eax = pThis;
+#endif 
 #endif
 
 	int ret = SSH_Rdpkt_Original(datalen, data);
 
 	// Do things
 
-	if(bFlag == FALSE)
+	if (bFlag == FALSE)
 	{
-		if(data != NULL && datalen > 0) PluginSystem::ProcessAndSaveRead("SSH_RecvSend.pcap", data, datalen);
+		if (data != NULL && datalen > 0) PluginSystem::ProcessAndSaveRead("SSH_RecvSend.pcap", data, datalen);
 	}
 
 	FunctionFlow::UnCheckFlag();
@@ -525,19 +544,28 @@ int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 {
 #if defined _M_IX86
-	DWORD ecx_bkp = 0;
-	__asm { mov ecx_bkp, ecx };
+	DWORD pThis = 0;
+#ifdef _MSC_VER
+	__asm { mov pThis, ecx };
+#else 
+	register unsigned long ecx asm("ecx");
+	pThis = ecx;
+#endif
 #endif
 
 	// Stuff required to avoid overwriting ECX
-	
+
 	unsigned char **temp_data = data;
 	DWORD temp_size = size;
-	
+
 	BOOL bFlag = FunctionFlow::CheckFlag();
 
 #if defined _M_IX86
-	__asm { mov ecx, ecx_bkp };
+#ifdef _MSC_VER
+	__asm { mov ecx, pThis };
+#else
+	ecx = pThis;
+#endif
 #endif
 
 	int ret = SecureCRT_Original(temp_data, temp_size);

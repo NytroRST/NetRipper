@@ -100,16 +100,16 @@ void Inject()
 			PR_Write_Original = (PR_Write_Typedef)GetProcAddress(LoadLibrary(sModuleName.c_str()), "PR_Write");
 			PR_GetDescType_Original = (PR_GetDescType_Typedef)GetProcAddress(LoadLibrary(sModuleName.c_str()), "PR_GetDescType");
 
-			MH_CreateHook((void *)PR_Read_Original, (void *)PR_Read_Callback, &((void *)PR_Read_Original));
-			MH_CreateHook((void *)PR_Write_Original, (void *)PR_Write_Callback, &((void *)PR_Write_Original));
+			MH_CreateHook((void *)PR_Read_Original, (void *)PR_Read_Callback, (void **)&PR_Read_Original);
+			MH_CreateHook((void *)PR_Write_Original, (void *)PR_Write_Callback, (void **)&PR_Write_Original);
 
 			// PR_Send, PR_Recv
 
 			PR_Recv_Original = (PR_Recv_Typedef)GetProcAddress(LoadLibrary(sModuleName.c_str()), "PR_Recv");
 			PR_Send_Original = (PR_Send_Typedef)GetProcAddress(LoadLibrary(sModuleName.c_str()), "PR_Send");
 
-			MH_CreateHook((void *)PR_Recv_Original, (void *)PR_Recv_Callback, &((void *)PR_Recv_Original));
-			MH_CreateHook((void *)PR_Send_Original, (void *)PR_Send_Callback, &((void *)PR_Send_Original));
+			MH_CreateHook((void *)PR_Recv_Original, (void *)PR_Recv_Callback, (void **)&PR_Recv_Original);
+			MH_CreateHook((void *)PR_Send_Original, (void *)PR_Send_Callback, (void **)&PR_Send_Original);
 		}
 
 		// SslEncryptPacket, SslDecryptPacket
@@ -119,8 +119,8 @@ void Inject()
 			SslEncryptPacket_Original = (SslEncryptPacket_Typedef)GetProcAddress(LoadLibrary("ncrypt.dll"), "SslEncryptPacket");
 			SslDecryptPacket_Original = (SslDecryptPacket_Typedef)GetProcAddress(LoadLibrary("ncrypt.dll"), "SslDecryptPacket");
 
-			MH_CreateHook((void *)SslEncryptPacket_Original, (void *)SslEncryptPacket_Callback, &((void *)SslEncryptPacket_Original));
-			MH_CreateHook((void *)SslDecryptPacket_Original, (void *)SslDecryptPacket_Callback, &((void *)SslDecryptPacket_Original));
+			MH_CreateHook((void *)SslEncryptPacket_Original, (void *)SslEncryptPacket_Callback, (void **)&SslEncryptPacket_Original);
+			MH_CreateHook((void *)SslDecryptPacket_Original, (void *)SslDecryptPacket_Callback, (void **)&SslDecryptPacket_Original);
 		}
 
 		// send, recv, WSASend, WSARecv
@@ -130,14 +130,14 @@ void Inject()
 			recv_Original = (recv_Typedef)GetProcAddress(LoadLibrary("ws2_32.dll"), "recv");
 			send_Original = (send_Typedef)GetProcAddress(LoadLibrary("ws2_32.dll"), "send");
 
-			MH_CreateHook((void *)recv_Original, (void *)recv_Callback, &((void *)recv_Original));
-			MH_CreateHook((void *)send_Original, (void *)send_Callback, &((void *)send_Original));
+			MH_CreateHook((void *)recv_Original, (void *)recv_Callback, (void **)&recv_Original);
+			MH_CreateHook((void *)send_Original, (void *)send_Callback, (void **)&send_Original);
 
 			WSARecv_Original = (WSARecv_Typedef)GetProcAddress(LoadLibrary("ws2_32.dll"), "WSARecv");
 			WSASend_Original = (WSASend_Typedef)GetProcAddress(LoadLibrary("ws2_32.dll"), "WSASend");
 
-			MH_CreateHook((void *)WSARecv_Original, (void *)WSARecv_Callback, &((void *)WSARecv_Original));
-			MH_CreateHook((void *)WSASend_Original, (void *)WSASend_Callback, &((void *)WSASend_Original));
+			MH_CreateHook((void *)WSARecv_Original, (void *)WSARecv_Callback, (void **)&WSARecv_Original);
+			MH_CreateHook((void *)WSASend_Original, (void *)WSASend_Callback, (void **)&WSASend_Original);
 		}
 
 		// EncryptMessage, DecryptMessage
@@ -147,8 +147,8 @@ void Inject()
 			EncryptMessage_Original = (EncryptMessage_Typedef)GetProcAddress(LoadLibrary("secur32.dll"), "EncryptMessage");
 			DecryptMessage_Original = (DecryptMessage_Typedef)GetProcAddress(LoadLibrary("secur32.dll"), "DecryptMessage");
 
-			MH_CreateHook((void *)EncryptMessage_Original, (void *)EncryptMessage_Callback, &((void *)EncryptMessage_Original));
-			MH_CreateHook((void *)DecryptMessage_Original, (void *)DecryptMessage_Callback, &((void *)DecryptMessage_Original));
+			MH_CreateHook((void *)EncryptMessage_Original, (void *)EncryptMessage_Callback, (void **)&EncryptMessage_Original);
+			MH_CreateHook((void *)DecryptMessage_Original, (void *)DecryptMessage_Callback, (void **)&DecryptMessage_Original);
 		}
 
 		// SSLeay_Write, SSLeay_Read
@@ -158,8 +158,8 @@ void Inject()
 			SSLeay_Write_Original = (SSLeay_Write_Typedef)GetProcAddress(LoadLibrary("ssleay32.dll"), "SSL_write");
 			SSLeay_Read_Original  = (SSLeay_Read_Typedef) GetProcAddress(LoadLibrary("ssleay32.dll"), "SSL_read");
 			
-			MH_CreateHook((void *)SSLeay_Write_Original, (void *)SSLeay_Write_Callback, &((void *)SSLeay_Write_Original));
-			MH_CreateHook((void *)SSLeay_Read_Original,  (void *)SSLeay_Read_Callback,  &((void *)SSLeay_Read_Original));
+			MH_CreateHook((void *)SSLeay_Write_Original, (void *)SSLeay_Write_Callback, (void **)&SSLeay_Write_Original);
+			MH_CreateHook((void *)SSLeay_Read_Original,  (void *)SSLeay_Read_Callback, (void **)&SSLeay_Read_Original);
 		}
 
 		// chrome.dll
@@ -196,7 +196,7 @@ void Inject()
 			// Hook SecureCRT function
 
 			SecureCRT_Original = (SecureCRT_Typedef)GetProcAddress(LoadLibrary("ssh2core83u.dll"), "?Get_raw_pointer@SSHPacket@SSH2@@QAE_NAAPAEH@Z");
-			MH_CreateHook((void *)SecureCRT_Original, (void *)SecureCRT_Callback, &((void *)SecureCRT_Original));
+			MH_CreateHook((void *)SecureCRT_Original, (void *)SecureCRT_Callback, (void **)&SecureCRT_Original);
 		}
 	}
 

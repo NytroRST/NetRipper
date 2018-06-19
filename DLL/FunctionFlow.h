@@ -2,7 +2,7 @@
 #ifndef _FUNCTIONFLOW_H_
 #define _FUNCTIONFLOW_H_
 
-#include <Windows.h>
+#include <windows.h>
 #include <vector>
 
 using namespace std;

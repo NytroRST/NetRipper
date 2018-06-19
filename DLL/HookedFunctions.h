@@ -8,9 +8,9 @@
 #include "DebugLog.h"
 #include "FunctionFlow.h"
 #include "PluginSystem.h"
-#include "Minhook.h"
-#include <WinSock2.h>
-#include <Security.h>
+#include "MinHook.h"
+#include <winsock2.h>
+#include <security.h>
 #include <stdio.h>
 
 // =============================================================================================//

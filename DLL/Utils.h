@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdint>
-#include <WinSock2.h>
+#include <winsock2.h>
 #include "DebugLog.h"
 #include "DynConfig.h"
 
