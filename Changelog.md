@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.20:
+- PCAP improvements
+
 Version 1.1.19:
 - Added support for cross-compilation on Linux
 

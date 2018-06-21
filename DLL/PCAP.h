@@ -15,14 +15,25 @@ using namespace std;
 
 #pragma pack(push, 1)
 
+// Tracking seq and ack based in IPs/ports
+
+struct PacketTracker
+{
+	uint32_t nSeq = 0;
+	uint32_t nAck = 0;
+	uint32_t nSrcIP = 0x10101010;
+	uint32_t nDstIP = 0x20202020;
+	uint16_t nSrcPort = 1337;
+	uint16_t nDstPort = 80;
+};
+
 // Struct used internally
 
 struct PCAPFile
 {
 	string sFilename;
 	bool   bHeaderWritten = 0;
-	uint32_t nSeq = 0;
-	uint32_t nAck = 0;
+	vector<PacketTracker*> vPacketTrackers;
 	CRITICAL_SECTION oCriticalSection;
 };
 
@@ -101,8 +112,9 @@ class PCAP
 
 	// Internal functions
 
-	static PCAPFile* CreatePCAP(string p_sFilename);
-	static PCAPFile* GetPCAP(string p_sFilename);
+	static PCAPFile* CreatePCAP(string p_sFilename, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
+	static PCAPFile* GetPCAP(string p_sFilename, bool p_bDataSent, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
+	static PacketTracker* GetPacketTracker(PCAPFile *p_pPCAP, bool p_bDataSent, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort);
 	static void WriteHeader(PCAPFile *p_pPCAP);
 	static pcaprec_hdr_s CreatePacketHeader(size_t nLength);
 	static unsigned char* CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,

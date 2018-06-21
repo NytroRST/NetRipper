@@ -194,8 +194,8 @@ void Inject()
 		else if (Utils::ToLower(vDlls[i].szModule).compare("ssh2core83u.dll") == 0)
 		{
 			// Hook SecureCRT function
-
-			SecureCRT_Original = (SecureCRT_Typedef)GetProcAddress(LoadLibrary("ssh2core83u.dll"), "?Get_raw_pointer@SSHPacket@SSH2@@QAE_NAAPAEH@Z");
+			
+			SecureCRT_Original = (SecureCRT_Typedef)GetProcAddress(LoadLibrary("ssh2core83u.dll"), "?Get_raw_pointer@SSHPacket@SSH2@@QEAA_NAEAPEAEH@Z");
 			MH_CreateHook((void *)SecureCRT_Original, (void *)SecureCRT_Callback, (void **)&SecureCRT_Original);
 		}
 	}

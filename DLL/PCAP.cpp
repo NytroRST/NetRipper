@@ -6,17 +6,28 @@ vector<PCAPFile*> PCAP::s_vPCAPFiles;
 
 // Create a PCAP struct
 
-PCAPFile* PCAP::CreatePCAP(string p_sFilepatn)
+PCAPFile* PCAP::CreatePCAP(string p_sFilepath, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
 	PCAPFile* pcap = new PCAPFile();
-	pcap->sFilename = p_sFilepatn;
+	pcap->sFilename = p_sFilepath;
 
 	pcap->bHeaderWritten = false;
 	InitializeCriticalSection(&pcap->oCriticalSection);
 
 	srand((unsigned int)time(NULL));
-	pcap->nAck = (uint32_t)rand();
-	pcap->nSeq = (uint32_t)rand();
+
+	// Packet tracker
+
+	PacketTracker *first = new PacketTracker();
+	first->nAck = (uint32_t)rand();
+	first->nSeq = (uint32_t)rand();
+
+	first->nSrcIP = p_sSrcIP;
+	first->nDstIP = p_sDstIP;
+	first->nSrcPort = p_nSrcPort;
+	first->nDstPort = p_nDstPort;
+
+	pcap->vPacketTrackers.push_back(first);
 
 	s_vPCAPFiles.push_back(pcap);
 
@@ -25,16 +36,46 @@ PCAPFile* PCAP::CreatePCAP(string p_sFilepatn)
 
 // Find a PCAP struct by filepath or create it
 
-PCAPFile* PCAP::GetPCAP(string p_sFilename)
+PCAPFile* PCAP::GetPCAP(string p_sFilename, bool p_bDataSent, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
 	for (size_t i = 0; i < s_vPCAPFiles.size(); i++)
 	{
-		if (p_sFilename.compare(s_vPCAPFiles[i]->sFilename) == 0) return s_vPCAPFiles[i];
+		if (p_sFilename.compare(s_vPCAPFiles[i]->sFilename) == 0)
+		{
+			// Create tracker if not there
+
+			bool bFound = false;
+
+			for (size_t p = 0; p < s_vPCAPFiles[i]->vPacketTrackers.size(); p++)
+			{
+				if ((s_vPCAPFiles[i]->vPacketTrackers[p]->nSrcIP == p_sSrcIP        && s_vPCAPFiles[i]->vPacketTrackers[p]->nDstIP == p_sDstIP &&
+						s_vPCAPFiles[i]->vPacketTrackers[p]->nSrcPort == p_nSrcPort && s_vPCAPFiles[i]->vPacketTrackers[p]->nDstPort == p_nDstPort) ||
+					(s_vPCAPFiles[i]->vPacketTrackers[p]->nSrcIP == p_sDstIP        && s_vPCAPFiles[i]->vPacketTrackers[p]->nDstIP == p_sSrcIP &&
+						s_vPCAPFiles[i]->vPacketTrackers[p]->nSrcPort == p_nDstPort && s_vPCAPFiles[i]->vPacketTrackers[p]->nDstPort == p_nSrcPort))
+					bFound = true;
+			}
+
+			if (!bFound)
+			{
+				PacketTracker *newtracker = new PacketTracker();
+				newtracker->nAck = (uint32_t)rand();
+				newtracker->nSeq = (uint32_t)rand();
+
+				newtracker->nSrcIP = p_sSrcIP;
+				newtracker->nDstIP = p_sDstIP;
+				newtracker->nSrcPort = p_nSrcPort;
+				newtracker->nDstPort = p_nDstPort;
+
+				s_vPCAPFiles[i]->vPacketTrackers.push_back(newtracker);
+			}
+
+			return s_vPCAPFiles[i];
+		}
 	}
 
 	// Or create it
 
-	return CreatePCAP(p_sFilename);
+	return CreatePCAP(p_sFilename, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
 }
 
 // Write the PCAP file
@@ -77,6 +118,23 @@ pcaprec_hdr_s PCAP::CreatePacketHeader(size_t nLength)
 	return header;
 }
 
+// Return a packet tracker by IPs/ports
+
+PacketTracker* PCAP::GetPacketTracker(PCAPFile *p_pPCAP, bool p_bDataSent, uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
+{
+	for (size_t i = 0; i < p_pPCAP->vPacketTrackers.size(); i++)
+	{
+		if( (p_pPCAP->vPacketTrackers[i]->nSrcIP == p_sSrcIP     && p_pPCAP->vPacketTrackers[i]->nDstIP == p_sDstIP &&
+				p_pPCAP->vPacketTrackers[i]->nSrcPort == p_nSrcPort && p_pPCAP->vPacketTrackers[i]->nDstPort == p_nDstPort) ||
+			(p_pPCAP->vPacketTrackers[i]->nSrcIP == p_sDstIP && p_pPCAP->vPacketTrackers[i]->nDstIP == p_sSrcIP &&
+				p_pPCAP->vPacketTrackers[i]->nSrcPort == p_nDstPort && p_pPCAP->vPacketTrackers[i]->nDstPort == p_nSrcPort)
+			) return p_pPCAP->vPacketTrackers[i];
+	}
+
+	DebugLog::Log("ERROR: GetPacketTracker - PacketTracker not found!");
+	return NULL;
+}
+
 // Create packet contents, including TCP/IP header (https://github.com/google/ssl_logger/blob/master/ssl_logger.py)
 
 unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, size_t p_nSize,
@@ -87,17 +145,23 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 	unsigned char *pData = NULL;
 	uint32_t seq = 0, ack = 0;
 
+	// Packet tracker
+
+	PacketTracker def;
+	PacketTracker *p = GetPacketTracker(p_pPCAP, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
+	if (p == NULL) p = &def;
+
 	// Get SEQ and ACK
 
 	if (p_bDataSent)
 	{
-		seq = p_pPCAP->nSeq;
-		ack = p_pPCAP->nAck;
+		seq = p->nSeq;
+		ack = p->nAck;
 	}
 	else
 	{
-		seq = p_pPCAP->nAck;
-		ack = p_pPCAP->nSeq;
+		seq = p->nAck;
+		ack = p->nSeq;
 	}
 
 	// Set up IP header
@@ -142,8 +206,8 @@ unsigned char* PCAP::CreatePacket(PCAPFile *p_pPCAP, unsigned char *p_pcData, si
 
 	// Update SEQ and ACK
 
-	if (p_bDataSent) p_pPCAP->nSeq += (uint32_t)p_nSize;
-	else p_pPCAP->nAck += (uint32_t)p_nSize;
+	if (p_bDataSent) p->nSeq += (uint32_t)p_nSize;
+	else p->nAck += (uint32_t)p_nSize;
 
 	// Create packet
 
@@ -177,7 +241,7 @@ void PCAP::WritePacketData(PCAPFile *p_pPCAP, string p_sFilename, unsigned char 
 void PCAP::WriteData(string p_sFilename, unsigned char *p_pcData, size_t p_nSize, bool p_bDataSent,
 	uint32_t p_sSrcIP, uint32_t p_sDstIP, uint16_t p_nSrcPort, uint16_t p_nDstPort)
 {
-	PCAPFile *pcap = GetPCAP(p_sFilename);
+	PCAPFile *pcap = GetPCAP(p_sFilename, p_bDataSent, p_sSrcIP, p_sDstIP, p_nSrcPort, p_nDstPort);
 	size_t size_counter = (size_t)(p_nSize / MAX_PACKET_SIZE);
 	size_t size_rest    = (size_t)(p_nSize % MAX_PACKET_SIZE);
 
