@@ -193,6 +193,7 @@ HANDLE WINAPI LoadRemoteLibraryR( HANDLE hProcess, LPVOID lpBuffer, DWORD dwLeng
 	HANDLE hThread                            = NULL;
 	DWORD dwReflectiveLoaderOffset            = 0;
 	DWORD dwThreadId                          = 0;
+	DWORD oldP                                = 0;
 
 	__try
 	{
@@ -216,6 +217,11 @@ HANDLE WINAPI LoadRemoteLibraryR( HANDLE hProcess, LPVOID lpBuffer, DWORD dwLeng
 
 			// write the image into the host process...
 			if( !WriteProcessMemory( hProcess, lpRemoteLibraryBuffer, lpBuffer, dwLength, NULL ) )
+				break;
+
+			// Use only PAGE_EXECUTE_READ
+
+			if (!VirtualProtectEx(hProcess, lpRemoteLibraryBuffer, dwLength, PAGE_EXECUTE_READ, &oldP))
 				break;
 			
 			// add the offset to ReflectiveLoader() to the remote library address...

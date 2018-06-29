@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.21:
+- Fixed Reflective DLL Injection
+
 Version 1.1.20:
 - PCAP improvements
 
