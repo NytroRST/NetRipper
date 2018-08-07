@@ -24,6 +24,9 @@ DLL.dll       - Injected DLL, hook APIs and save data to files
 netripper.rb  - Metasploit post-exploitation module
 ```
 
+# Binaries [![Build status](https://ci.appveyor.com/api/projects/status/9l15gspoank0tgyv?svg=true)](https://ci.appveyor.com/project/osospeed/netripper)
+An automatic build is available. Binaries can be downloaded from the Artifacts section [here](https://ci.appveyor.com/project/osospeed/netripper/build/artifacts).
+
 # Command line
 
 ```
