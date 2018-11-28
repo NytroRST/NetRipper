@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.22:
+- Added support for Chrome 70 x64
+
 Version 1.1.21:
 - Fixed Reflective DLL Injection
 
