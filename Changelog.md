@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.23:
+- Added support for Slack x64
+
 Version 1.1.22:
 - Added support for Chrome 70 x64
 

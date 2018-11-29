@@ -10,5 +10,6 @@
 void HookChrome();
 void HookPutty();
 void HookWinSCP();
+void HookSlack();
 
 #endif

