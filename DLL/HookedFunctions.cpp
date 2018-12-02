@@ -541,18 +541,8 @@ int __fastcall SSH_Rdpkt_Callback(int datalen, unsigned char *data)
 
 // SecureCRT_Write callback
 
-int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
+int __cdecl SecureCRT_Callback(void *pthis, unsigned char **data, DWORD size)
 {
-#if defined _M_IX86
-	DWORD pThis = 0;
-#ifdef _MSC_VER
-	__asm { mov pThis, ecx };
-#else 
-	register unsigned long ecx asm("ecx");
-	pThis = ecx;
-#endif
-#endif
-
 	// Stuff required to avoid overwriting ECX
 
 	unsigned char **temp_data = data;
@@ -560,15 +550,7 @@ int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size)
 
 	BOOL bFlag = FunctionFlow::CheckFlag();
 
-#if defined _M_IX86
-#ifdef _MSC_VER
-	__asm { mov ecx, pThis };
-#else
-	ecx = pThis;
-#endif
-#endif
-
-	int ret = SecureCRT_Original(temp_data, temp_size);
+	int ret = SecureCRT_Original(pthis, temp_data, temp_size);
 
 	// Do things
 

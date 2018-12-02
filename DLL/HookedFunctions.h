@@ -54,11 +54,11 @@ int SSLeay_Read_Callback(void *ssl, void *buffer, int amount);
 
 // SecureCRT_Write
 
-typedef int(__stdcall *SecureCRT_Typedef)(unsigned char **data, DWORD);
+typedef int(__stdcall *SecureCRT_Typedef)(void *pthis, unsigned char **data, DWORD);
 
 // Callback
 
-int __stdcall SecureCRT_Callback(unsigned char **data, DWORD size);
+int __cdecl SecureCRT_Callback(void *pthis, unsigned char **data, DWORD size);
 
 // =============================================================================================//
 

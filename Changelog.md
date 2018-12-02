@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.24:
+- Added support for Opera and SecureCRT
+
 Version 1.1.23:
 - Added support for Slack x64
 

@@ -4,7 +4,7 @@
 
 // Chrome 64
 
-void HookChrome()
+void HookChrome(string p_sModule)
 {
 	SECTION_INFO rdata = {0, 0};
 	SECTION_INFO text  = {0, 0};
@@ -29,7 +29,7 @@ void HookChrome()
 
 	// Get section
 
-	text  = Process::GetModuleSection("chrome.dll", ".text");
+	text  = Process::GetModuleSection(p_sModule, ".text");
 
 	// Check if chrome
 
