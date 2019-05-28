@@ -14,7 +14,7 @@ The post-exploitation activities in a penetration test can be challenging if the
 
 # Tested applications
 
-NetRipper should be able to capture network traffic from: Putty, WinSCP, SQL Server Management Studio, Lync (Skype for Business), Microsoft Outlook, Google Chrome, Mozilla Firefox. The list is not limited to these applications but other tools may require special support.
+NetRipper should be able to capture network traffic from: Putty, WinSCP, SQL Server Management Studio, Microsoft Outlook, Google Chrome, Mozilla Firefox and multiple other tools. The list is not limited to these applications but other tools may require special support.
 
 # Components
 
@@ -88,7 +88,6 @@ Set PROCESSNAMES or PROCESSIDS and run.
 # PowerShell module
 
 @HarmJ0y Added Invoke-NetRipper.ps1 PowerShell implementation of NetRipper.exe
-
 Please note that the PowerShell module is not up to date.
 
 # Plugins
