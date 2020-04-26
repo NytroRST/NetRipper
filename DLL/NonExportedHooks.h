@@ -10,6 +10,5 @@
 void HookChrome(string p_sModule);
 void HookPutty();
 void HookWinSCP();
-void HookSlack();
 
 #endif

