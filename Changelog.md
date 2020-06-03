@@ -1,5 +1,8 @@
 # Changelog
 
+Version 1.1.25:
+- Added initial support for process monitoring
+
 Version 1.1.24:
 - Added support for Opera and SecureCRT
 

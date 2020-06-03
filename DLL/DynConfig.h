@@ -18,6 +18,7 @@ class DynConfig
 	static string s_sDataLimit;
 	static string s_sStringFinder;
 	static string s_sConfigurationString;
+	static string s_sProcessList;
 	
 public:
 
@@ -26,6 +27,7 @@ public:
 	static string GetPlainText();
 	static string GetDataLimit();
 	static string GetStringFinder();
+	static string GetProcessList();
 };
 
 #endif

@@ -10,6 +10,7 @@
 #include "NonExportedHooks.h"
 #include "PluginSystem.h"
 #include "Plugin.h"
+#include "ProcessMonitor.h"
 #include "MinHook.h"
 
 // Use minhook
@@ -71,6 +72,7 @@ void Inject()
 	DebugLog::Init();
 	FunctionFlow::Init();
 	DynConfig::Init();
+	ProcessMonitor::Init();
 
 	DebugLog::LogString("NetRipper: ", "Initialized!");
 

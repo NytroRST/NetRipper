@@ -121,13 +121,16 @@
     <ClInclude Include="DebugLog.h" />
     <ClInclude Include="DynConfig.h" />
     <ClInclude Include="FunctionFlow.h" />
+    <ClInclude Include="GetProcAddressR.h" />
     <ClInclude Include="HookedFunctions.h" />
     <ClInclude Include="InjectedDLL.h" />
+    <ClInclude Include="LoadLibraryR.h" />
     <ClInclude Include="NonExportedHooks.h" />
     <ClInclude Include="PCAP.h" />
     <ClInclude Include="Plugin.h" />
     <ClInclude Include="PluginSystem.h" />
     <ClInclude Include="Process.h" />
+    <ClInclude Include="ProcessMonitor.h" />
     <ClInclude Include="ReflectiveDLLInjection.h" />
     <ClInclude Include="ReflectiveLoader.h" />
     <ClInclude Include="stdafx.h" />
@@ -146,13 +149,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GetProcAddressR.cpp" />
     <ClCompile Include="HookedFunctions.cpp" />
     <ClCompile Include="InjectedDLL.cpp" />
+    <ClCompile Include="LoadLibraryR.cpp" />
     <ClCompile Include="NonExportedHooks.cpp" />
     <ClCompile Include="PCAP.cpp" />
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="PluginSystem.cpp" />
     <ClCompile Include="Process.cpp" />
+    <ClCompile Include="ProcessMonitor.cpp" />
     <ClCompile Include="ReflectiveLoader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

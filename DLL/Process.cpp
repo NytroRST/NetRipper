@@ -201,3 +201,50 @@ vector<MODULEENTRY32> Process::GetProcessModules(DWORD p_dwID)
 
 	return vModules;
 }
+
+// Function that returns a vector with all processes
+
+vector<PROCESS_TO_MONITOR> Process::GetProcesses()
+{
+	HANDLE hSnapshot;
+	PROCESSENTRY32 hProcess;
+	PROCESS_TO_MONITOR oProcess;
+	vector<PROCESS_TO_MONITOR> vProcesses;
+
+	/* Get processes snapshot */
+
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+	if (hSnapshot == INVALID_HANDLE_VALUE)
+	{
+		DebugLog::Log("ERROR: Cannot get process list!");
+		return vProcesses;
+	}
+
+	// Get first process
+
+	hProcess.dwSize = sizeof(PROCESSENTRY32);
+
+	if (!Process32First(hSnapshot, &hProcess))
+	{
+		DebugLog::Log("ERROR: Cannot get first process!");
+		return vProcesses;
+	}
+
+	oProcess.Id = hProcess.th32ProcessID;
+	oProcess.ProcessName = hProcess.szExeFile;
+
+	vProcesses.push_back(oProcess);
+
+	// Get all processes
+
+	while (Process32Next(hSnapshot, &hProcess))
+	{
+		oProcess.Id = hProcess.th32ProcessID;
+		oProcess.ProcessName = hProcess.szExeFile;
+		
+		vProcesses.push_back(oProcess);
+	}
+
+	return vProcesses;
+}

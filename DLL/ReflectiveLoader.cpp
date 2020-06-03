@@ -61,6 +61,8 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 	GETPROCADDRESS pGetProcAddress = NULL;
 	VIRTUALALLOC pVirtualAlloc     = NULL;
 	NTFLUSHINSTRUCTIONCACHE pNtFlushInstructionCache = NULL;
+	CREATEFILEMAPPING pCreateFileMapping = NULL;
+	MAPVIEWOFFILE pMapViewOfFile = NULL;
 
 	USHORT usCounter;
 
@@ -152,7 +154,7 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 		if( (DWORD)uiValueC == KERNEL32DLL_HASH )
 		{
 			// get this modules base address
-			uiBaseAddress = (ULONG_PTR)((PLDR_DATA_TABLE_ENTRY)uiValueA)->DllBase;
+			uiBaseAddress = (ULONG_PTR)((PLDR_DATA_TABLE_ENTRY)uiValueA)->DllBase; 
 
 			// get the VA of the modules NT Header
 			uiExportDir = uiBaseAddress + ((PIMAGE_DOS_HEADER)uiBaseAddress)->e_lfanew;
@@ -169,7 +171,7 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 			// get the VA for the array of name ordinals
 			uiNameOrdinals = ( uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY )uiExportDir)->AddressOfNameOrdinals );
 
-			usCounter = 3;
+			usCounter = 5;
 
 			// loop while we still have imports to find
 			while( usCounter > 0 )
@@ -178,7 +180,7 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 				dwHashValue = hash( (char *)( uiBaseAddress + DEREF_32( uiNameArray ) )  );
 				
 				// if we have found a function we want we get its virtual address
-				if( dwHashValue == LOADLIBRARYA_HASH || dwHashValue == GETPROCADDRESS_HASH || dwHashValue == VIRTUALALLOC_HASH )
+				if( dwHashValue == LOADLIBRARYA_HASH || dwHashValue == GETPROCADDRESS_HASH || dwHashValue == VIRTUALALLOC_HASH || dwHashValue == CREATEFILEMAPPING_HASH || dwHashValue == MAPVIEWOFFILE_HASH )
 				{
 					// get the VA for the array of addresses
 					uiAddressArray = ( uiBaseAddress + ((PIMAGE_EXPORT_DIRECTORY )uiExportDir)->AddressOfFunctions );
@@ -193,7 +195,11 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 						pGetProcAddress = (GETPROCADDRESS)( uiBaseAddress + DEREF_32( uiAddressArray ) );
 					else if( dwHashValue == VIRTUALALLOC_HASH )
 						pVirtualAlloc = (VIRTUALALLOC)( uiBaseAddress + DEREF_32( uiAddressArray ) );
-			
+					else if (dwHashValue == CREATEFILEMAPPING_HASH)
+						pCreateFileMapping = (CREATEFILEMAPPING)(uiBaseAddress + DEREF_32(uiAddressArray));
+					else if (dwHashValue == MAPVIEWOFFILE_HASH)
+						pMapViewOfFile = (MAPVIEWOFFILE)(uiBaseAddress + DEREF_32(uiAddressArray));
+
 					// decrement our counter
 					usCounter--;
 				}
@@ -281,6 +287,26 @@ DLLEXPORT ULONG_PTR WINAPI ReflectiveLoader( VOID )
 
 	while( uiValueA-- )
 		*(BYTE *)uiValueC++ = *(BYTE *)uiValueB++;
+
+	// Self Reflective: Get raw DLL size
+	DWORD dwSize = *(DWORD*)((unsigned char*)uiLibraryAddress + 2);
+	char pcSharedMemoryName[] = {'S','e','l','f','R','e','f','l','e','c','t','i','v','e'};
+
+	// Create named shared memory to store 4 bytes size + raw DLL size
+	HANDLE hMapFile = pCreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(DWORD) + dwSize, pcSharedMemoryName);
+
+	if (hMapFile != NULL)
+	{
+		void* pSMBuf = pMapViewOfFile(hMapFile, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(DWORD) + dwSize);
+
+		if (pSMBuf != NULL)
+		{
+			// Copy 4 bytes size + RAW DLL
+			*(DWORD*)pSMBuf = dwSize;
+			for (size_t i = 0; i < dwSize; i++)
+				*((unsigned char*)pSMBuf + sizeof(DWORD) + i) = *((unsigned char*)uiLibraryAddress + i);
+		}
+	}
 
 	// STEP 3: load in all of our sections...
 

