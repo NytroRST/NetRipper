@@ -173,6 +173,15 @@ void Inject()
 			HookChrome("chrome.dll");
 		}
 
+		// electron.dll
+
+		else if(Utils::ToLower(vDlls[i].szModule).compare("electron.exe") == 0)
+		{
+			// Hook Chrome functions
+
+			HookChrome("electron.exe");
+		}
+
 		// opera_browser.dll
 
 		else if (Utils::ToLower(vDlls[i].szModule).compare("opera_browser.dll") == 0)
