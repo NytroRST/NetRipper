@@ -182,6 +182,15 @@ void Inject()
 			HookChrome("electron.exe");
 		}
 
+		// brave.exe
+
+		else if (Utils::ToLower(vDlls[i].szModule).compare("brave.exe") == 0)
+		{
+			// Hook Chrome functions
+
+			HookChrome("brave.exe");
+		}
+
 		// opera_browser.dll
 
 		else if (Utils::ToLower(vDlls[i].szModule).compare("opera_browser.dll") == 0)
